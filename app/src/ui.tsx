@@ -2,7 +2,7 @@ import { useRef, useState, type FormEvent } from 'react'
 import { motion, useMotionValueEvent, useScroll, useSpring } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, Check, Menu, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link } from './router'
+import { Link, usePath } from './router'
 import { CATEGORIES, inCategory, solutionPath } from './solutions'
 
 export const MAIL = 'kontakt@skenderi-solutions.ch'
@@ -35,25 +35,28 @@ export function Lockup() {
 /* ---------- nav ---------- */
 
 const LINKS = [
-  ['Leistungen', '/#leistungen'],
+  ['Leistungen', '/leistungen'],
+  ['Über uns', '/ueber-uns'],
   ['Ablauf', '/#ablauf'],
-  ['Kontakt', '#kontakt'],
+  ['Kontakt', '/kontakt'],
 ]
 
 export function Nav() {
   const [open, setOpen] = useState(false)
+  const path = usePath()
+  const here = (h: string) => (h === path || (h !== '/' && !h.includes('#') && path.startsWith(h + '/')) ? 'page' : undefined)
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-night">
       <div className={`${WRAP} flex h-16 items-center justify-between`}>
         <Lockup />
         <nav className="hidden items-center gap-8 md:flex" aria-label="Hauptnavigation">
           {LINKS.map(([l, h]) => (
-            <Link key={h} href={h} className="text-[15px] font-medium text-steel no-underline transition-colors duration-150 hover:text-paper">
+            <Link key={h} href={h} aria-current={here(h)} className="text-[15px] font-medium text-steel no-underline transition-colors duration-150 hover:text-paper aria-[current=page]:text-paper">
               {l}
             </Link>
           ))}
           <Link
-            href="#kontakt"
+            href="/kontakt"
             className="group inline-flex h-10 items-center gap-2 bg-paper px-4 text-[14px] font-semibold text-night no-underline transition-colors duration-150 hover:bg-signal hover:text-paper"
           >
             Erstgespräch
@@ -67,10 +70,13 @@ export function Nav() {
       {open && (
         <nav className="border-t border-white/10 md:hidden" aria-label="Mobile Navigation">
           {LINKS.map(([l, h]) => (
-            <Link key={h} href={h} onClick={() => setOpen(false)} className="block border-b border-white/10 px-5 py-4 text-[18px] font-semibold text-paper no-underline last:border-b-0">
+            <Link key={h} href={h} aria-current={here(h)} onClick={() => setOpen(false)} className="block border-b border-white/10 px-5 py-4 text-[18px] font-semibold text-paper no-underline">
               {l}
             </Link>
           ))}
+          <Link href="/kontakt" onClick={() => setOpen(false)} className="m-5 flex h-12 items-center justify-center gap-2 bg-paper text-[16px] font-semibold text-night no-underline">
+            Erstgespräch anfragen <ArrowRight className="size-4" />
+          </Link>
         </nav>
       )}
     </header>
@@ -154,6 +160,48 @@ export function Stage({ children, tall = false }: { children: React.ReactNode; t
       </div>
       {/* phones: the S gets its own frame under the copy instead of hiding behind it */}
       <img src="/img/hero-1280.webp" alt="" width={1280} height={800} className="mt-12 aspect-[5/4] w-full object-cover object-[86%_60%] md:hidden" />
+    </section>
+  )
+}
+
+/* ---------- every service, grouped by area (home and /leistungen) ---------- */
+
+export function ServiceList() {
+  return (
+    <section id="leistungen" className="scroll-mt-16">
+      <div className={`${WRAP} py-24 md:py-32`}>
+        <div className="grid gap-8 lg:grid-cols-12">
+          <h2 className={`${H2} lg:col-span-7`}>Alles, was eine IT-Firma macht. Aus einer Hand.</h2>
+          <p className="max-w-[44ch] text-[18px] leading-[1.6] text-ink-2 lg:col-span-4 lg:col-start-9 lg:self-end">
+            Vom Netzwerkkabel bis zur eigenen App. Sie wählen einzelne Leistungen oder geben das Ganze ab; alles landet in einer Dokumentation, die Ihnen gehört.
+          </p>
+        </div>
+
+        <div className="mt-16 md:mt-24">
+          {CATEGORIES.map((c) => (
+            <div key={c.id} id={c.id} className="grid scroll-mt-20 gap-6 border-t border-ink py-10 md:py-14 lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-4">
+                <h3 className="font-display text-[clamp(1.15rem,1.7vw,1.4rem)] leading-tight tracking-[-0.01em]">{c.title}</h3>
+                <p className="mt-3 max-w-[32ch] text-[16px] leading-[1.6] text-ink-2">{c.text}</p>
+              </div>
+              <ul className="lg:col-span-8">
+                {inCategory(c.id).map((s) => (
+                  <li key={s.slug} className="border-b border-line first:border-t lg:first:border-t-0">
+                    <Link
+                      href={solutionPath(s.slug)}
+                      className="group grid gap-x-6 gap-y-1 py-5 no-underline transition-colors duration-200 sm:grid-cols-[minmax(0,15rem)_1fr_auto] sm:items-center md:hover:bg-paper-2 sm:px-3"
+                    >
+                      <span className="text-[18px] font-[600] tracking-[-0.01em]">{s.title}</span>
+                      <span className="text-[15px] leading-[1.55] text-ink-2">{s.short}</span>
+                      <ArrowRight className="hidden size-4 text-mute transition-[color,transform] duration-200 ease-out-expo group-hover:translate-x-1 group-hover:text-ink sm:block" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   )
 }
@@ -275,6 +323,12 @@ export function Contact({ about }: { about?: string }) {
 
 /* ---------- footer: also the sitemap of every service ---------- */
 
+const COMPANY = [
+  ['Leistungen', '/leistungen'],
+  ['Über uns', '/ueber-uns'],
+  ['Kontakt', '/kontakt'],
+]
+
 export function Footer() {
   return (
     <footer className="bg-night text-paper">
@@ -282,6 +336,15 @@ export function Footer() {
         <div className="md:col-span-3">
           <Lockup />
           <p className="mt-5 max-w-[28ch] text-[14px] leading-[1.6] text-steel">IT, Software und Automatisierung für KMU in der Schweiz.</p>
+          <ul className="mt-8 space-y-2">
+            {COMPANY.map(([l, h]) => (
+              <li key={h}>
+                <Link href={h} className="text-[14px] font-semibold text-paper no-underline hover:underline">
+                  {l}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
         <nav className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:col-span-9 lg:grid-cols-5" aria-label="Alle Leistungen">
           {CATEGORIES.map((c) => (
@@ -301,7 +364,13 @@ export function Footer() {
         </nav>
       </div>
       <div className="border-t border-white/10">
-        <p className={`${WRAP} tabular py-6 text-[13px] text-steel`}>© 2026 Skenderi Solutions</p>
+        <div className={`${WRAP} flex flex-wrap items-center justify-between gap-4 py-6 text-[13px] text-steel`}>
+          <p className="tabular">© 2026 Skenderi Solutions</p>
+          <p className="flex gap-6">
+            <Link href="/impressum" className="text-steel no-underline hover:text-paper hover:underline">Impressum</Link>
+            <Link href="/datenschutz" className="text-steel no-underline hover:text-paper hover:underline">Datenschutz</Link>
+          </p>
+        </div>
       </div>
     </footer>
   )

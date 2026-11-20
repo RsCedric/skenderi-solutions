@@ -1,5 +1,5 @@
-# Skenderi Solutions mark as a real object: the S bent from one titanium bar, two glass nodes with a blue light inside.
-# Built from the SVG path of the old mark (M84 30 H50 a15 15 0 0 0 0 30 H70 a15 15 0 0 1 0 30 H36), 1 unit = 1 mm.
+# Skenderi Solutions mark "Rack" as a real object: one milled titanium block, three rack units joined into an S,
+# a blue status light at the back of both slots. Outline from logo/a-rack.svg, 1 unit = 1 mm.
 #
 #   blender -b -P render/scene.py -- --mode test           hero framing, half size, few samples
 #   blender -b -P render/scene.py -- --mode hero           2400x1500 hero still (dark studio)
@@ -73,71 +73,51 @@ def backdrop_mat():
 def link(o):
     sc.collection.objects.link(o); return o
 
-# --- the S: path sampled from the SVG, swept with a rounded-rectangle profile -------------------
-def s_points():
+# --- the S "Rack": three rack units joined into one milled block, two slots with a blue light at the back ----
+# outline from logo/a-rack.svg (256 grid), 1 grid unit = 0.375 mm, so the block is 72 x 72 mm
+G = 0.375
+def outline():
     pts = []
-    def line(a, b, n=2):
-        for i in range(n): pts.append((a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n))
-    def arc(cx, cy, r, a0, a1, n=40):
+    def line(a, b): pts.append(a)
+    def arc(cx, cy, r, a0, a1, n=24):
         for i in range(n):
-            a = a0 + (a1 - a0) * i / n
-            pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
-    line((84, 30), (50, 30), 6)
-    arc(50, 45, 15, -math.pi / 2, -3 * math.pi / 2)      # around the left, top to bottom
-    line((50, 60), (70, 60), 4)
-    arc(70, 75, 15, -math.pi / 2, math.pi / 2)            # around the right
-    line((70, 90), (36, 90), 6)
-    pts.append((36, 90))
+            a = math.radians(a0 + (a1 - a0) * i / n); pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    line((72, 32), (184, 32)); arc(184, 72, 40, -90, 0)
+    line((224, 72), (224, 80)); line((224, 80), (92, 80)); arc(92, 92, 12, -90, -270)
+    line((92, 104), (224, 104)); line((224, 104), (224, 184)); arc(184, 184, 40, 0, 90)
+    line((184, 224), (72, 224)); arc(72, 184, 40, 90, 180)
+    line((32, 184), (32, 176)); line((32, 176), (164, 176)); arc(164, 164, 12, 90, -90)
+    line((164, 152), (32, 152)); line((32, 152), (32, 72)); arc(72, 72, 40, 180, 270)
     return pts
 
-W, D, R = 8.0, 13.0, 2.6      # bar width in the drawing plane, depth, corner radius (mm)
-def profile():
-    cu = bpy.data.curves.new("Profil", "CURVE"); cu.dimensions = "2D"
-    sp = cu.splines.new("POLY"); pts = []
-    hw, hd = W / 2 * MM, D / 2 * MM; r = R * MM
-    for cx, cy, a0 in ((hw - r, hd - r, 0), (-hw + r, hd - r, 90), (-hw + r, -hd + r, 180), (hw - r, -hd + r, 270)):
-        for i in range(7):
-            a = math.radians(a0 + 90 * i / 6); pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
-    sp.points.add(len(pts) - 1)
-    for p, (x, y) in zip(sp.points, pts): p.co = (x, y, 0, 1)
-    sp.use_cyclic_u = True
-    o = link(bpy.data.objects.new("Profil", cu)); o.hide_render = True; o.hide_viewport = True
-    return o
-
-BOTTOM = 95.5   # lowest point (bottom of the lower node), sits on the floor
+BOTTOM = 95.5
 def to_world(x, y):
     # drawing plane = XZ, standing upright, centred on x = 60
     return Vector(((x - 60) * MM, 0, (BOTTOM - y) * MM))
+def grid(u, v):
+    return to_world(60 + (u - 128) * G, BOTTOM - (224 - v) * G)
 
+D = float(arg("--depth", "16"))   # block depth (mm)
 def build_mark(tilt_deg=0.0):
     root = link(bpy.data.objects.new("Zeichen", None))
-    cu = bpy.data.curves.new("S", "CURVE"); cu.dimensions = "3D"; cu.twist_mode = "MINIMUM"
-    cu.bevel_mode = "OBJECT"; cu.bevel_object = profile(); cu.use_fill_caps = True
-    sp = cu.splines.new("POLY"); pts = s_points(); sp.points.add(len(pts) - 1)
-    for p, (x, y) in zip(sp.points, pts):
-        v = to_world(x, y); p.co = (v.x, v.y, v.z, 1)
-    s = link(bpy.data.objects.new("S", cu)); s.data.materials.append(titanium()); s.parent = root
-    # turn the curve into a mesh so edges can get a real bevel and smooth shading
-    bpy.context.view_layer.objects.active = s; s.select_set(True)
-    bpy.ops.object.convert(target="MESH")
-    s = bpy.context.active_object
+    me = bpy.data.meshes.new("S"); bm = bmesh.new()
+    front = [bm.verts.new(grid(u, v) + Vector((0, -D / 2 * MM, 0))) for u, v in outline()]
+    face = bm.faces.new(front)
+    ext = bmesh.ops.extrude_face_region(bm, geom=[face])
+    bmesh.ops.translate(bm, vec=Vector((0, D * MM, 0)), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me); bm.free()
+    s = link(bpy.data.objects.new("S", me)); s.data.materials.append(titanium()); s.parent = root
     for poly in s.data.polygons: poly.use_smooth = True
-    bv = s.modifiers.new("Kante", "BEVEL"); bv.width = 0.35 * MM; bv.segments = 3; bv.limit_method = "ANGLE"
-    s.modifiers.new("Glatt", "WEIGHTED_NORMAL").keep_sharp = False
-
-    g, e = glass(), emitter()
-    for (x, y) in ((88.5, 30), (31.5, 90)):
-        c = to_world(x, y)
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=96, ring_count=48, radius=5.6 * MM, location=c)
-        o = bpy.context.active_object; o.data.materials.append(g); o.parent = root
-        for poly in o.data.polygons: poly.use_smooth = True
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=2.6 * MM, location=c)
-        o = bpy.context.active_object; o.data.materials.append(e); o.parent = root
-        for poly in o.data.polygons: poly.use_smooth = True
-        # a small light so the glow also lands on the titanium and the floor
-        l = bpy.data.lights.new("Knoten", "POINT"); l.energy = float(arg("--node-light", "1.6")); l.color = (0.3, 0.55, 1.0)
-        l.shadow_soft_size = 0.002
-        lo = link(bpy.data.objects.new("Knoten", l)); lo.location = c; lo.parent = root
+    bv = s.modifiers.new("Kante", "BEVEL"); bv.width = float(arg("--bevel", "0.7")) * MM; bv.segments = 4; bv.limit_method = "ANGLE"
+    s.modifiers.new("Glatt", "WEIGHTED_NORMAL").keep_sharp = True
+    # a blue light strip at the back of each slot, like the status light in a rack unit
+    e = emitter()
+    for (u0, u1, v0, v1) in ((86, 224, 83, 101), (32, 170, 155, 173)):
+        a, b = grid(u0, v1), grid(u1, v0)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=((a.x + b.x) / 2, (D / 2 - 1.6) * MM, (a.z + b.z) / 2))
+        o = bpy.context.active_object; o.scale = (abs(b.x - a.x), 3.0 * MM, abs(b.z - a.z))
+        o.data.materials.append(e); o.parent = root
     root.rotation_euler = (0, 0, math.radians(tilt_deg))
     return root
 
@@ -169,7 +149,7 @@ lp = wn.new("ShaderNodeLightPath"); mix = wn.new("ShaderNodeMixShader")
 wl.new(lp.outputs["Is Camera Ray"], mix.inputs[0]); wl.new(bg.outputs[0], mix.inputs[1]); wl.new(dark.outputs[0], mix.inputs[2])
 wl.new(mix.outputs[0], wn["World Output"].inputs["Surface"])
 
-C = Vector((0, 0, 0.034))
+C = Vector((0, 0, 0.036))
 # a long strip softbox overhead-left draws the bright line along the bar, a cool rim separates it from the dark
 area("Key", (-0.24, 0.06, 0.4), C, (0.5, 0.12), 30, (1.0, 0.97, 0.92))
 area("Spiegel", (0.05, -0.4, 0.4), C, (0.7, 0.14), 10, (0.95, 0.97, 1.0))

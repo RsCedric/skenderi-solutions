@@ -40,11 +40,11 @@ export default function SolutionPage({ s }: { s: Solution }) {
     <>
       <Stage>
         <nav aria-label="Pfad" className="mb-14 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-steel md:mb-20">
-          <Link href="/#leistungen" className="inline-flex items-center gap-1.5 no-underline hover:text-paper hover:underline">
+          <Link href="/leistungen" className="inline-flex items-center gap-1.5 no-underline hover:text-paper hover:underline">
             <ArrowLeft className="size-3.5" /> Leistungen
           </Link>
           <span aria-hidden>/</span>
-          <Link href={`/#${cat.id}`} className="no-underline hover:text-paper hover:underline">
+          <Link href={`/leistungen#${cat.id}`} className="no-underline hover:text-paper hover:underline">
             {cat.title}
           </Link>
         </nav>

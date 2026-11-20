@@ -1,22 +1,44 @@
 import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Link, useInitialHash } from './router'
-import { CATEGORIES, inCategory, solutionPath } from './solutions'
-import { Contact, H2, Process, QuickForm, Stage, WRAP } from './ui'
+import { Link } from './router'
+import { CATEGORIES, inCategory } from './solutions'
+import { Contact, H2, Process, QuickForm, ServiceList, WRAP } from './ui'
 
+/* the landing: the headline owns the top, the rendered mark gets its own wide frame underneath */
 function Hero() {
   return (
-    <Stage tall>
-      <h1 className="font-display text-[clamp(2rem,4.3vw,3.7rem)] leading-[1.08] tracking-[-0.025em] text-balance">
-        IT, die geplant ist. <span className="text-steel">Nicht geflickt.</span>
-      </h1>
-      <p className="mt-8 max-w-[44ch] text-[19px] leading-[1.55] text-[#C9D0DD]">
-        Netzwerk, Cloud, Sicherheit, Websites, eigene Software und Automatisierung für KMU. Ein Ansprechpartner, ein Plan, der aufgeht.
-      </p>
-      <div className="mt-10">
-        <QuickForm />
+    <section id="top" className="relative isolate overflow-hidden bg-night text-paper">
+      <div className={`${WRAP} relative z-10 pt-14 md:pt-20`}>
+        <h1 className="font-display text-[clamp(2.1rem,5.6vw,5.4rem)] leading-[1.04] tracking-[-0.03em]">
+          IT, die geplant ist.
+          <br />
+          <span className="text-steel">Nicht geflickt.</span>
+        </h1>
+        <div className="mt-10 grid gap-10 md:mt-14 lg:grid-cols-12 lg:items-end lg:gap-8">
+          <p className="max-w-[46ch] text-[19px] leading-[1.6] text-[#C9D0DD] lg:col-span-5">
+            Netzwerk, Cloud, Sicherheit, Websites, eigene Software und Automatisierung für KMU. Ein Ansprechpartner, ein Plan, der aufgeht.
+          </p>
+          <div className="lg:col-span-6 lg:col-start-7 lg:flex lg:justify-end">
+            <QuickForm />
+          </div>
+        </div>
       </div>
-    </Stage>
+      <div className="relative mt-6 md:-mt-10">
+        <picture>
+          <source media="(min-width: 768px)" srcSet="/img/hero.webp" />
+          <img
+            src="/img/hero-1280.webp"
+            alt="Das Zeichen von Skenderi Solutions: ein gefrästes Titan-S mit blauem Licht in den Schlitzen"
+            width={2400}
+            height={1500}
+            fetchPriority="high"
+            className="h-[clamp(300px,44vw,640px)] w-full object-cover object-[80%_58%]"
+          />
+        </picture>
+        {/* the render's black sky melts into the page above */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-night to-transparent" aria-hidden />
+      </div>
+    </section>
   )
 }
 
@@ -44,40 +66,20 @@ function AreaStrip() {
   )
 }
 
-function Services() {
+function AboutTeaser() {
   return (
-    <section id="leistungen" className="scroll-mt-16">
-      <div className={`${WRAP} py-24 md:py-32`}>
-        <div className="grid gap-8 lg:grid-cols-12">
-          <h2 className={`${H2} lg:col-span-7`}>Alles, was eine IT-Firma macht. Aus einer Hand.</h2>
-          <p className="max-w-[44ch] text-[18px] leading-[1.6] text-ink-2 lg:col-span-4 lg:col-start-9 lg:self-end">
-            Vom Netzwerkkabel bis zur eigenen App. Sie wählen einzelne Leistungen oder geben das Ganze ab; alles landet in einer Dokumentation, die Ihnen gehört.
+    <section className="bg-paper-2">
+      <div className={`${WRAP} grid gap-10 py-24 md:py-32 lg:grid-cols-12 lg:gap-8`}>
+        <h2 className={`${H2} lg:col-span-5`}>Eine IT-Firma, die man anrufen kann.</h2>
+        <div className="lg:col-span-6 lg:col-start-7">
+          <p className="max-w-[48ch] text-[18px] leading-[1.65] text-ink-2">
+            Ein fester Ansprechpartner statt fünf Anbieter. Erst ein schriftlicher Plan, dann die Umsetzung. Und eine Dokumentation, die Ihnen gehört, auch wenn Sie einmal
+            wechseln.
           </p>
-        </div>
-
-        <div className="mt-16 md:mt-24">
-          {CATEGORIES.map((c) => (
-            <div key={c.id} id={c.id} className="grid scroll-mt-20 gap-6 border-t border-ink py-10 md:py-14 lg:grid-cols-12 lg:gap-8">
-              <div className="lg:col-span-4">
-                <h3 className="font-display text-[clamp(1.15rem,1.7vw,1.4rem)] leading-tight tracking-[-0.01em]">{c.title}</h3>
-                <p className="mt-3 max-w-[32ch] text-[16px] leading-[1.6] text-ink-2">{c.text}</p>
-              </div>
-              <ul className="lg:col-span-8">
-                {inCategory(c.id).map((s) => (
-                  <li key={s.slug} className="border-b border-line first:border-t lg:first:border-t-0">
-                    <Link
-                      href={solutionPath(s.slug)}
-                      className="group grid gap-x-6 gap-y-1 py-5 no-underline transition-colors duration-200 sm:grid-cols-[minmax(0,15rem)_1fr_auto] sm:items-center md:hover:bg-paper-2 sm:px-3"
-                    >
-                      <span className="text-[18px] font-[600] tracking-[-0.01em]">{s.title}</span>
-                      <span className="text-[15px] leading-[1.55] text-ink-2">{s.short}</span>
-                      <ArrowRight className="hidden size-4 text-mute transition-[color,transform] duration-200 ease-out-expo group-hover:translate-x-1 group-hover:text-ink sm:block" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <Link href="/ueber-uns" className="group mt-8 inline-flex items-center gap-2 text-[17px] font-semibold text-ink underline">
+            Mehr über uns
+            <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
     </section>
@@ -85,7 +87,6 @@ function Services() {
 }
 
 export default function Home() {
-  useInitialHash()
   useEffect(() => {
     document.title = 'Skenderi Solutions · IT, Software und Automatisierung für KMU'
   }, [])
@@ -93,7 +94,8 @@ export default function Home() {
     <>
       <Hero />
       <AreaStrip />
-      <Services />
+      <ServiceList />
+      <AboutTeaser />
       <Process />
       <Contact />
     </>
