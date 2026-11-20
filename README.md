@@ -41,3 +41,5 @@ Build: `npm run build` (Ausgabe in `app/dist`).
 ## Logo
 
 `logo-mark.svg`: geometrisches „S“ als Leiterbahn, Midnight Navy `#0B1B3A` und Signal Blue `#3D7BFF`.
+
+Die ursprünglichen Logo-Entwürfe liegen in `design/logo/` (`logo.html` zeigt das Logo in allen Varianten, `logo-mark.svg` ist das Zeichen).
