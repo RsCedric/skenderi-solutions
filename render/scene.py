@@ -1,5 +1,5 @@
-# Skenderi Solutions mark "Rack" as a real object: one milled titanium block, three rack units joined into an S,
-# a blue status light at the back of both slots. Outline from logo/a-rack.svg, 1 unit = 1 mm.
+# Skenderi Solutions mark "Rack", noble cut: a thin black ceramic plate, three rack units joined into an S,
+# polished champagne chamfer and walls, a faint blue light at the back of both slots. Outline from logo/a-rack.svg, 1 unit = 1 mm.
 #
 #   blender -b -P render/scene.py -- --mode test           hero framing, half size, few samples
 #   blender -b -P render/scene.py -- --mode hero           2400x1500 hero still (dark studio)
@@ -43,6 +43,28 @@ def titanium():
     nt.links.new(n.outputs["Fac"], b.inputs["Height"]); nt.links.new(b.outputs["Normal"], p.inputs["Normal"])
     return m
 
+def ceramic():
+    # black ceramic face: deep, glossy, a clear coat on top, a whisper of surface variation
+    m, nt, p = principled("Keramik")
+    p.inputs["Base Color"].default_value = (0.006, 0.0065, 0.008, 1)
+    p.inputs["Roughness"].default_value = 0.22
+    p.inputs["Coat Weight"].default_value = 1.0
+    p.inputs["Coat Roughness"].default_value = 0.035
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    n = nt.nodes.new("ShaderNodeTexNoise"); n.inputs["Scale"].default_value = 900; n.inputs["Detail"].default_value = 6
+    nt.links.new(tc.outputs["Object"], n.inputs["Vector"])
+    mr = nt.nodes.new("ShaderNodeMapRange"); mr.inputs["To Min"].default_value = 0.025; mr.inputs["To Max"].default_value = 0.05
+    nt.links.new(n.outputs["Fac"], mr.inputs["Value"]); nt.links.new(mr.outputs["Result"], p.inputs["Coat Roughness"])
+    return m
+
+def polished():
+    # mirror-polished metal with a faint champagne warmth, for the chamfer and the walls
+    m, nt, p = principled("Poliert")
+    p.inputs["Base Color"].default_value = (0.95, 0.87, 0.74, 1)
+    p.inputs["Metallic"].default_value = 1.0
+    p.inputs["Roughness"].default_value = 0.07
+    return m
+
 def glass():
     m, nt, p = principled("Glas")
     p.inputs["Base Color"].default_value = (0.7, 0.82, 1.0, 1)
@@ -55,7 +77,7 @@ def emitter():
     m, nt, p = principled("Licht")
     p.inputs["Base Color"].default_value = (0.02, 0.06, 0.2, 1)
     p.inputs["Emission Color"].default_value = (0.04, 0.22, 1.0, 1)
-    p.inputs["Emission Strength"].default_value = float(arg("--glow", "5"))
+    p.inputs["Emission Strength"].default_value = float(arg("--glow", "0.6"))
     return m
 
 def backdrop_mat():
@@ -73,21 +95,23 @@ def backdrop_mat():
 def link(o):
     sc.collection.objects.link(o); return o
 
-# --- the S "Rack": three rack units joined into one milled block, two slots with a blue light at the back ----
-# outline from logo/a-rack.svg (256 grid), 1 grid unit = 0.375 mm, so the block is 72 x 72 mm
+# --- the S "Rack", noble cut: a thin black ceramic plate, slots narrowed, a polished chamfer all round ----------
+# outline from logo/a-rack.svg (256 grid), 1 grid unit = 0.375 mm, so the plate is 72 x 72 mm
 G = 0.375
+SL = float(arg("--slot", "8"))   # half slot height in grid units (svg: 12)
 def outline():
     pts = []
     def line(a, b): pts.append(a)
     def arc(cx, cy, r, a0, a1, n=24):
         for i in range(n):
             a = math.radians(a0 + (a1 - a0) * i / n); pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    h = SL
     line((72, 32), (184, 32)); arc(184, 72, 40, -90, 0)
-    line((224, 72), (224, 80)); line((224, 80), (92, 80)); arc(92, 92, 12, -90, -270)
-    line((92, 104), (224, 104)); line((224, 104), (224, 184)); arc(184, 184, 40, 0, 90)
+    line((224, 72), (224, 92 - h)); line((224, 92 - h), (92, 92 - h)); arc(92, 92, h, -90, -270, 16)
+    line((92, 92 + h), (224, 92 + h)); line((224, 92 + h), (224, 184)); arc(184, 184, 40, 0, 90)
     line((184, 224), (72, 224)); arc(72, 184, 40, 90, 180)
-    line((32, 184), (32, 176)); line((32, 176), (164, 176)); arc(164, 164, 12, 90, -90)
-    line((164, 152), (32, 152)); line((32, 152), (32, 72)); arc(72, 72, 40, 180, 270)
+    line((32, 184), (32, 164 + h)); line((32, 164 + h), (164, 164 + h)); arc(164, 164, h, 90, -90, 16)
+    line((164, 164 - h), (32, 164 - h)); line((32, 164 - h), (32, 72)); arc(72, 72, 40, 180, 270)
     return pts
 
 BOTTOM = 95.5
@@ -97,7 +121,7 @@ def to_world(x, y):
 def grid(u, v):
     return to_world(60 + (u - 128) * G, BOTTOM - (224 - v) * G)
 
-D = float(arg("--depth", "16"))   # block depth (mm)
+D = float(arg("--depth", "8"))   # plate depth (mm)
 def build_mark(tilt_deg=0.0):
     root = link(bpy.data.objects.new("Zeichen", None))
     me = bpy.data.meshes.new("S"); bm = bmesh.new()
@@ -106,17 +130,22 @@ def build_mark(tilt_deg=0.0):
     ext = bmesh.ops.extrude_face_region(bm, geom=[face])
     bmesh.ops.translate(bm, vec=Vector((0, D * MM, 0)), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    for f in bm.faces:   # faces: front/back stay ceramic (0), the walls get polished metal (1)
+        f.material_index = 0 if abs(f.normal.y) > 0.9 else 1
     bm.to_mesh(me); bm.free()
-    s = link(bpy.data.objects.new("S", me)); s.data.materials.append(titanium()); s.parent = root
+    s = link(bpy.data.objects.new("S", me)); s.parent = root
+    s.data.materials.append(ceramic()); s.data.materials.append(polished())
     for poly in s.data.polygons: poly.use_smooth = True
-    bv = s.modifiers.new("Kante", "BEVEL"); bv.width = float(arg("--bevel", "0.7")) * MM; bv.segments = 4; bv.limit_method = "ANGLE"
+    # one wide flat chamfer, like a watch case: it catches the strip lights as a bright line
+    bv = s.modifiers.new("Fase", "BEVEL"); bv.width = float(arg("--bevel", "2.0")) * MM; bv.segments = 1
+    bv.limit_method = "ANGLE"; bv.angle_limit = math.radians(60); bv.material = 1; bv.harden_normals = True
     s.modifiers.new("Glatt", "WEIGHTED_NORMAL").keep_sharp = True
-    # a blue light strip at the back of each slot, like the status light in a rack unit
+    # a faint blue light at the back of each slot
     e = emitter()
-    for (u0, u1, v0, v1) in ((86, 224, 83, 101), (32, 170, 155, 173)):
-        a, b = grid(u0, v1), grid(u1, v0)
-        bpy.ops.mesh.primitive_cube_add(size=1, location=((a.x + b.x) / 2, (D / 2 - 1.6) * MM, (a.z + b.z) / 2))
-        o = bpy.context.active_object; o.scale = (abs(b.x - a.x), 3.0 * MM, abs(b.z - a.z))
+    for (u0, u1, vc) in ((92, 224, 92), (32, 164, 164)):
+        a, b = grid(u0, vc + SL - 2), grid(u1, vc - SL + 2)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=((a.x + b.x) / 2, (D / 2 - 1.0) * MM, (a.z + b.z) / 2))
+        o = bpy.context.active_object; o.scale = (abs(b.x - a.x), 1.6 * MM, abs(b.z - a.z))
         o.data.materials.append(e); o.parent = root
     root.rotation_euler = (0, 0, math.radians(tilt_deg))
     return root
