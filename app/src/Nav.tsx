@@ -136,7 +136,10 @@ export function Nav() {
               aria-controls="nav-leistungen"
               onClick={() => {
                 // a click right after hover opened it should not slam it shut again
-                if (hovered.current && mega) return
+                if (hovered.current && mega) {
+                  hovered.current = false
+                  return
+                }
                 setMega((m) => !m)
               }}
               className={`inline-flex h-full items-center gap-1.5 text-[15px] font-medium transition-colors duration-150 hover:text-paper ${mega || inServices ? 'text-paper' : 'text-steel'}`}
