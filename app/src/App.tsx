@@ -6,7 +6,8 @@ import SolutionPage from './SolutionPage'
 import { AboutPage, ContactPage, ImprintPage, PrivacyPage, ServicesPage } from './Pages'
 import { Link, useInitialHash, usePath } from './router'
 import { bySlug } from './solutions'
-import { Contact, Footer, Nav, Stage } from './ui'
+import { Nav } from './Nav'
+import { Contact, Footer, Stage } from './ui'
 
 function NotFound() {
   useEffect(() => {

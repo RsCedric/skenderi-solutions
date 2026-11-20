@@ -1,8 +1,8 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from 'framer-motion'
-import { ArrowRight, ArrowUpRight, Check, Menu, X } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link, usePath } from './router'
+import { Link } from './router'
 import { CATEGORIES, inCategory, solutionPath } from './solutions'
 
 export const MAIL = 'kontakt@skenderi-solutions.ch'
@@ -70,57 +70,6 @@ export function Lockup() {
         SKENDERI <span className="text-steel">SOLUTIONS</span>
       </span>
     </Link>
-  )
-}
-
-/* ---------- nav ---------- */
-
-const LINKS = [
-  ['Leistungen', '/leistungen'],
-  ['Über uns', '/ueber-uns'],
-  ['Ablauf', '/#ablauf'],
-  ['Kontakt', '/kontakt'],
-]
-
-export function Nav() {
-  const [open, setOpen] = useState(false)
-  const path = usePath()
-  const here = (h: string) => (h === path || (h !== '/' && !h.includes('#') && path.startsWith(h + '/')) ? 'page' : undefined)
-  return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-night">
-      <div className={`${WRAP} flex h-16 items-center justify-between`}>
-        <Lockup />
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Hauptnavigation">
-          {LINKS.map(([l, h]) => (
-            <Link key={h} href={h} aria-current={here(h)} className="text-[15px] font-medium text-steel no-underline transition-colors duration-150 hover:text-paper aria-[current=page]:text-paper">
-              {l}
-            </Link>
-          ))}
-          <Link
-            href="/kontakt"
-            className="group inline-flex h-10 items-center gap-2 bg-paper px-4 text-[14px] font-semibold text-night no-underline transition-colors duration-150 hover:bg-signal hover:text-paper"
-          >
-            Erstgespräch
-            <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" strokeWidth={2.2} />
-          </Link>
-        </nav>
-        <button className="-mr-2 grid size-11 place-items-center text-paper md:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menü">
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
-      </div>
-      {open && (
-        <nav className="border-t border-white/10 md:hidden" aria-label="Mobile Navigation">
-          {LINKS.map(([l, h]) => (
-            <Link key={h} href={h} aria-current={here(h)} onClick={() => setOpen(false)} className="block border-b border-white/10 px-5 py-4 text-[18px] font-semibold text-paper no-underline">
-              {l}
-            </Link>
-          ))}
-          <Link href="/kontakt" onClick={() => setOpen(false)} className="m-5 flex h-12 items-center justify-center gap-2 bg-paper text-[16px] font-semibold text-night no-underline">
-            Erstgespräch anfragen <ArrowRight className="size-4" />
-          </Link>
-        </nav>
-      )}
-    </header>
   )
 }
 
