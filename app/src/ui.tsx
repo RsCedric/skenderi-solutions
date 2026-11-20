@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { motion, useMotionValueEvent, useScroll, useSpring } from 'framer-motion'
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, Check, Menu, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, usePath } from './router'
@@ -15,10 +15,51 @@ export function openMail(subject: string, body: string) {
 export const H2 = 'font-display text-[clamp(1.7rem,3.4vw,2.9rem)] leading-[1.12] tracking-[-0.02em] text-balance'
 export const WRAP = 'mx-auto max-w-[1280px] px-5 md:px-8'
 
-/* ---------- brand: the rendered titanium S ---------- */
+/* ---------- brand: three steps that shorten toward one blue square, the plan and where it lands ---------- */
 
-export function Mark({ className = 'size-9' }: { className?: string }) {
-  return <img src="/img/mark-96.webp" srcSet="/img/mark-96.webp 1x, /img/mark-192.webp 2x" alt="" width={36} height={36} className={`${className} rounded-[7px]`} />
+const BARS = [
+  { y: 48, w: 160 },
+  { y: 106, w: 102 },
+  { y: 164, w: 44 },
+]
+
+export function Mark({ className = 'size-7' }: { className?: string }) {
+  return (
+    <svg viewBox="48 48 160 160" className={className} aria-hidden>
+      {BARS.map((r) => (
+        <rect key={r.y} x={48} y={r.y} width={r.w} height={44} fill="#EDEDE9" />
+      ))}
+      <rect x={164} y={164} width={44} height={44} fill="#3D7BFF" />
+    </svg>
+  )
+}
+
+/* the mark at display size: the steps slide out one after another, then the blue square lands */
+export function BigMark({ className = '' }: { className?: string }) {
+  const reduce = useReducedMotion()
+  return (
+    <svg viewBox="48 48 160 160" className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: drei Stufen, die zu einem blauen Quadrat führen">
+      {BARS.map((r, i) => (
+        <motion.g
+          key={r.y}
+          initial={reduce ? false : { scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.12 }}
+          style={{ originX: 0 }}
+        >
+          <rect x={48} y={r.y} width={r.w} height={44} fill="#EDEDE9" />
+        </motion.g>
+      ))}
+      <motion.g
+        initial={reduce ? false : { opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
+        style={{ originX: 0.5, originY: 0.5 }}
+      >
+        <rect x={164} y={164} width={44} height={44} fill="#3D7BFF" />
+      </motion.g>
+    </svg>
+  )
 }
 
 export function Lockup() {
@@ -140,26 +181,15 @@ export function QuickForm({ subject = 'Erstgespräch' }: { subject?: string }) {
   )
 }
 
-/* ---------- the render as a stage: the S stands on the right, text sits in the dark on the left ---------- */
+/* ---------- the dark stage: copy left, the mark stands quietly on the right ---------- */
 
 export function Stage({ children, tall = false }: { children: React.ReactNode; tall?: boolean }) {
   return (
     <section id="top" className="relative isolate overflow-hidden bg-night text-paper">
-      {/* wide screens: the render fills the stage, the S stands right of the copy */}
-      <img
-        src="/img/hero.webp"
-        alt=""
-        width={2400}
-        height={1500}
-        fetchPriority="high"
-        className="absolute inset-0 -z-10 hidden size-full object-cover object-[70%_50%] md:block"
-      />
-      <div className="absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,rgb(4_4_5/0.9)_0%,rgb(4_4_5/0.6)_34%,transparent_56%)] md:block" aria-hidden />
-      <div className={`${WRAP} ${tall ? 'md:min-h-[min(820px,calc(100svh-4rem))] md:pt-28 md:pb-28' : 'md:min-h-[600px] md:pt-24 md:pb-24'} flex flex-col justify-center pt-14`}>
-        <div className="md:max-w-[min(660px,54%)]">{children}</div>
+      <div className={`${WRAP} ${tall ? 'md:min-h-[min(820px,calc(100svh-4rem))] md:py-28' : 'md:min-h-[560px] md:py-24'} grid items-center gap-12 pb-16 pt-14 md:grid-cols-12`}>
+        <div className="md:col-span-7">{children}</div>
+        <BigMark className="hidden w-full max-w-[240px] justify-self-end md:col-span-4 md:col-start-9 md:block" />
       </div>
-      {/* phones: the S gets its own frame under the copy instead of hiding behind it */}
-      <img src="/img/hero-1280.webp" alt="" width={1280} height={800} className="mt-12 aspect-[5/4] w-full object-cover object-[86%_60%] md:hidden" />
     </section>
   )
 }

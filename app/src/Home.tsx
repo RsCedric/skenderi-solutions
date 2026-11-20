@@ -2,41 +2,27 @@ import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Link } from './router'
 import { CATEGORIES, inCategory } from './solutions'
-import { Contact, H2, Process, QuickForm, ServiceList, WRAP } from './ui'
+import { BigMark, Contact, H2, Process, QuickForm, ServiceList, WRAP } from './ui'
 
-/* the landing: the headline owns the top, the rendered mark gets its own wide frame underneath */
+/* the landing: headline and form on the left, the mark drawn large on the right */
 function Hero() {
   return (
     <section id="top" className="relative isolate overflow-hidden bg-night text-paper">
-      <div className={`${WRAP} relative z-10 pt-14 md:pt-20`}>
-        <h1 className="font-display text-[clamp(2.1rem,5.6vw,5.4rem)] leading-[1.04] tracking-[-0.03em]">
-          IT, die geplant ist.
-          <br />
-          <span className="text-steel">Nicht geflickt.</span>
-        </h1>
-        <div className="mt-10 grid gap-10 md:mt-14 lg:grid-cols-12 lg:items-end lg:gap-8">
-          <p className="max-w-[46ch] text-[19px] leading-[1.6] text-[#C9D0DD] lg:col-span-5">
+      <div className={`${WRAP} grid items-center gap-14 pb-20 pt-14 md:pb-28 md:pt-20 lg:min-h-[min(760px,calc(100svh-4rem))] lg:grid-cols-12 lg:gap-8`}>
+        <div className="lg:col-span-8">
+          <h1 className="font-display text-[clamp(2.1rem,4.8vw,4.5rem)] leading-[1.04] tracking-[-0.03em]">
+            IT, die geplant ist.
+            <br />
+            <span className="text-steel">Nicht geflickt.</span>
+          </h1>
+          <p className="mt-10 max-w-[46ch] text-[19px] leading-[1.6] text-[#C9D0DD]">
             Netzwerk, Cloud, Sicherheit, Websites, eigene Software und Automatisierung für KMU. Ein Ansprechpartner, ein Plan, der aufgeht.
           </p>
-          <div className="lg:col-span-6 lg:col-start-7 lg:flex lg:justify-end">
+          <div className="mt-10">
             <QuickForm />
           </div>
         </div>
-      </div>
-      <div className="relative mt-6 md:-mt-10">
-        <picture>
-          <source media="(min-width: 768px)" srcSet="/img/hero.webp" />
-          <img
-            src="/img/hero-1280.webp"
-            alt="Das Zeichen von Skenderi Solutions: ein gefrästes Titan-S mit blauem Licht in den Schlitzen"
-            width={2400}
-            height={1500}
-            fetchPriority="high"
-            className="h-[clamp(300px,44vw,640px)] w-full object-cover object-[80%_58%]"
-          />
-        </picture>
-        {/* the render's black sky melts into the page above */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-night to-transparent" aria-hidden />
+        <BigMark className="order-first w-[clamp(88px,24vw,120px)] lg:order-none lg:col-span-3 lg:col-start-10 lg:w-full lg:max-w-[280px] lg:justify-self-end" />
       </div>
     </section>
   )
