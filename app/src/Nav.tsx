@@ -70,6 +70,7 @@ export function Nav() {
   const header = useRef<HTMLElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const timer = useRef(0)
+  const hovered = useRef(false)
   const here = (h: string) => (h === path || (h !== '/' && !h.includes('#') && path.startsWith(h + '/')) ? 'page' : undefined)
   const inServices = path === '/leistungen' || path.startsWith('/leistungen/')
 
@@ -103,16 +104,27 @@ export function Nav() {
   const enter = () => {
     if (!finePointer()) return
     window.clearTimeout(timer.current)
+    hovered.current = true
     setMega(true)
   }
   const leave = () => {
     if (!finePointer()) return
     window.clearTimeout(timer.current)
+    hovered.current = false
     timer.current = window.setTimeout(() => setMega(false), 140)
   }
 
   return (
-    <header ref={header} className="sticky top-0 z-40 border-b border-white/10 bg-night">
+    <header
+      ref={header}
+      onClick={(e) => {
+        // links to the current page or a hash on it do not change the path, so close here as well
+        if ((e.target as HTMLElement).closest('a')) {
+          setMega(false)
+          setOpen(false)
+        }
+      }}
+      className="sticky top-0 z-40 border-b border-white/10 bg-night">
       <div className={`${WRAP} flex h-16 items-center justify-between`}>
         <Lockup />
         <nav className="hidden h-full items-center gap-8 md:flex" aria-label="Hauptnavigation">
@@ -122,7 +134,11 @@ export function Nav() {
               type="button"
               aria-expanded={mega}
               aria-controls="nav-leistungen"
-              onClick={() => setMega((m) => !m)}
+              onClick={() => {
+                // a click right after hover opened it should not slam it shut again
+                if (hovered.current && mega) return
+                setMega((m) => !m)
+              }}
               className={`inline-flex h-full items-center gap-1.5 text-[15px] font-medium transition-colors duration-150 hover:text-paper ${mega || inServices ? 'text-paper' : 'text-steel'}`}
             >
               Leistungen
