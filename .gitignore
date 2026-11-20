@@ -3,3 +3,6 @@ dist
 .impeccable
 *.log
 .DS_Store
+
+render/out/
+render/assets/

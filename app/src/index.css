@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
-@font-face { font-family: "Doto"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/doto-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Doto"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/doto-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
+@font-face { font-family: "Michroma"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/michroma-400-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Michroma"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/michroma-400-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
 @font-face { font-family: "Host Grotesk"; font-style: normal; font-weight: 300 800; font-display: swap; src: url("/fonts/host-grotesk-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Host Grotesk"; font-style: normal; font-weight: 300 800; font-display: swap; src: url("/fonts/host-grotesk-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
 
-/* "Anzeige": a flat page and one dot-matrix display. No glass, no glow, no rounding. */
+/* "Titan": a rendered titanium mark in a dark studio, flat paper pages around it. No glass, no gradient text, no rounding. */
 @theme {
   --color-paper: #EDEDE9;
   --color-paper-2: #E3E3DE;
@@ -14,9 +14,11 @@
   --color-mute: #6E7486;
   --color-line: rgb(11 27 58 / 0.16);
   --color-signal: #3D7BFF;
+  --color-night: #040405;
+  --color-steel: #A3ACBE;
   --color-error: #B3261E;
   --font-sans: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Doto", "Host Grotesk", ui-monospace, monospace;
+  --font-display: "Michroma", "Host Grotesk", ui-sans-serif, sans-serif;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 

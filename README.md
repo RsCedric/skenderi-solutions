@@ -2,7 +2,7 @@
 
 Website für **Skenderi Solutions**, IT-Dienstleister für KMU in der Schweiz: Netzwerk, Arbeitsplätze, Cloud & Microsoft 365, Sicherheit & Backup, Websites.
 
-Das Design heisst „Anzeige“: flach und präzise, wie eine Statusanzeige im Serverraum, passend zur Botschaft *„IT, die geplant ist. Nicht geflickt.“*. Papiergrund, Navy aus dem Logo, das Logo-Blau als einzige Signalfarbe, eckige Formen, keine Schatten. Im Hero steht eine Punktmatrix-Anzeige (Canvas), die zwischen dem Logo-S und den vier Bereichen Netzwerk, Arbeitsplätze, Cloud und Sicherheit wechselt. Schriften: Doto (Punktmatrix) und Host Grotesk.
+Das Design heisst „Titan“: ein gerendertes Titan-Zeichen (Blender Cycles, `render/scene.py`) in einem dunklen Studio, darum flache Papierseiten mit Navy-Tinte, das Logo-Blau als einzige Signalfarbe, eckige Formen, keine Schatten. Jede Leistung hat eine eigene Unterseite unter `/leistungen/<slug>` (15 Leistungen in 5 Bereichen). Schriften: Michroma (Überschriften) und Host Grotesk.
 
 ![Desktop Hero](screenshots/desktop-hero.png)
 
