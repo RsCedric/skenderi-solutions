@@ -15,40 +15,42 @@ export function openMail(subject: string, body: string) {
 export const H2 = 'font-display text-[clamp(1.7rem,3.4vw,2.9rem)] leading-[1.12] tracking-[-0.02em] text-balance'
 export const WRAP = 'mx-auto max-w-[1280px] px-5 md:px-8'
 
-/* ---------- brand: an isometric cube whose edges trace an S, the top face lit in signal blue ---------- */
+/* ---------- brand: one rounded line runs along the edges of a cube and draws an S, the top face lit in signal blue ---------- */
 
-const VB = '15.4 13 225.2 230'
-const S_PATH =
-  'M15.4 78L121.5 139.3L188.6 178L128 213L15.4 148V178L128 243L240.6 178L134.5 116.7L67.4 78L128 43L240.6 108V78L128 13Z'
-const FACE = 'M128 56L166.1 78L128 100L89.9 78Z'
+const VB = '31.4 18 193.2 220'
+const S_LINE = 'M214.6 78L128 28L41.4 78L214.6 178L128 228L41.4 178'
+const FACE = 'M128 62.4L155.1 78L128 93.6L100.9 78Z'
+const LINE = { fill: 'none', stroke: '#EDEDE9', strokeWidth: 20, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
+const BLUE = { fill: '#3D7BFF', stroke: '#3D7BFF', strokeWidth: 8, strokeLinejoin: 'round' } as const
 
 export function Mark({ className = 'size-7' }: { className?: string }) {
   return (
     <svg viewBox={VB} className={className} aria-hidden>
-      <path d={S_PATH} fill="#EDEDE9" />
-      <path d={FACE} fill="#3D7BFF" />
+      <path d={S_LINE} {...LINE} />
+      <path d={FACE} {...BLUE} />
     </svg>
   )
 }
 
-/* the mark at display size: the S is drawn in from the top, then the blue face drops onto the cube */
+/* the mark at display size: the line draws itself along the cube, then the blue face lights up */
 export function BigMark({ className = '' }: { className?: string }) {
   const reduce = useReducedMotion()
   return (
-    <svg viewBox={VB} className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: ein Würfel, dessen Kanten ein S bilden, die obere Fläche in Blau">
+    <svg viewBox={VB} className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: eine Linie folgt den Kanten eines Würfels und bildet ein S, die obere Fläche in Blau">
       <motion.path
-        d={S_PATH}
-        fill="#EDEDE9"
-        initial={reduce ? false : { clipPath: 'inset(0 0 100% 0)' }}
-        animate={{ clipPath: 'inset(0 0 0% 0)' }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+        d={S_LINE}
+        {...LINE}
+        initial={reduce ? false : { pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.1, ease: [0.65, 0, 0.35, 1], delay: 0.15 }}
       />
       <motion.path
         d={FACE}
-        fill="#3D7BFF"
-        initial={reduce ? false : { opacity: 0, y: -24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.85 }}
+        {...BLUE}
+        initial={reduce ? false : { opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 1.1 }}
+        style={{ originX: 0.5, originY: 0.5 }}
       />
     </svg>
   )
