@@ -2,7 +2,7 @@
 
 Website für **Skenderi Solutions**, IT-Dienstleister für KMU in der Schweiz: Netzwerk, Arbeitsplätze, Cloud & Microsoft 365, Sicherheit & Backup, Websites.
 
-Das Design ist flach und ruhig: dunkle Bühne oben, Papierseiten mit Navy-Tinte, das Logo-Blau als einzige Signalfarbe, eckige Formen, keine Schatten. Das Zeichen besteht aus drei Stufen, die zu einem blauen Quadrat führen (erst planen, dann bauen); Master in `logo/skenderi-mark.svg`. Jede Leistung hat eine eigene Unterseite unter `/leistungen/<slug>` (15 Leistungen in 5 Bereichen). Schriften: Michroma (Überschriften) und Host Grotesk.
+Das Design ist flach und ruhig: dunkle Bühne oben, Papierseiten mit Navy-Tinte, das Logo-Blau als einzige Signalfarbe, eckige Formen, keine Schatten. Das Zeichen ist ein isometrischer Würfel, dessen Kanten ein S bilden; die obere Fläche ist blau; Master in `logo/skenderi-mark.svg`. Jede Leistung hat eine eigene Unterseite unter `/leistungen/<slug>` (15 Leistungen in 5 Bereichen). Schriften: Michroma (Überschriften) und Host Grotesk.
 
 ![Desktop Hero](screenshots/desktop-hero.png)
 

@@ -15,49 +15,41 @@ export function openMail(subject: string, body: string) {
 export const H2 = 'font-display text-[clamp(1.7rem,3.4vw,2.9rem)] leading-[1.12] tracking-[-0.02em] text-balance'
 export const WRAP = 'mx-auto max-w-[1280px] px-5 md:px-8'
 
-/* ---------- brand: three steps that shorten toward one blue square, the plan and where it lands ---------- */
+/* ---------- brand: an isometric cube whose edges trace an S, the top face lit in signal blue ---------- */
 
-const BARS = [
-  { y: 48, w: 160 },
-  { y: 106, w: 102 },
-  { y: 164, w: 44 },
-]
+const VB = '15.4 13 225.2 230'
+const S_PATH =
+  'M15.4 78L121.5 139.3L188.6 178L128 213L15.4 148V178L128 243L240.6 178L134.5 116.7L67.4 78L128 43L240.6 108V78L128 13Z'
+const FACE = 'M128 56L166.1 78L128 100L89.9 78Z'
 
 export function Mark({ className = 'size-7' }: { className?: string }) {
   return (
-    <svg viewBox="48 48 160 160" className={className} aria-hidden>
-      {BARS.map((r) => (
-        <rect key={r.y} x={48} y={r.y} width={r.w} height={44} fill="#EDEDE9" />
-      ))}
-      <rect x={164} y={164} width={44} height={44} fill="#3D7BFF" />
+    <svg viewBox={VB} className={className} aria-hidden>
+      <path d={S_PATH} fill="#EDEDE9" />
+      <path d={FACE} fill="#3D7BFF" />
     </svg>
   )
 }
 
-/* the mark at display size: the steps slide out one after another, then the blue square lands */
+/* the mark at display size: the S is drawn in from the top, then the blue face drops onto the cube */
 export function BigMark({ className = '' }: { className?: string }) {
   const reduce = useReducedMotion()
   return (
-    <svg viewBox="48 48 160 160" className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: drei Stufen, die zu einem blauen Quadrat führen">
-      {BARS.map((r, i) => (
-        <motion.g
-          key={r.y}
-          initial={reduce ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.12 }}
-          style={{ originX: 0 }}
-        >
-          <rect x={48} y={r.y} width={r.w} height={44} fill="#EDEDE9" />
-        </motion.g>
-      ))}
-      <motion.g
-        initial={reduce ? false : { opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
-        style={{ originX: 0.5, originY: 0.5 }}
-      >
-        <rect x={164} y={164} width={44} height={44} fill="#3D7BFF" />
-      </motion.g>
+    <svg viewBox={VB} className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: ein Würfel, dessen Kanten ein S bilden, die obere Fläche in Blau">
+      <motion.path
+        d={S_PATH}
+        fill="#EDEDE9"
+        initial={reduce ? false : { clipPath: 'inset(0 0 100% 0)' }}
+        animate={{ clipPath: 'inset(0 0 0% 0)' }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+      />
+      <motion.path
+        d={FACE}
+        fill="#3D7BFF"
+        initial={reduce ? false : { opacity: 0, y: -24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.85 }}
+      />
     </svg>
   )
 }
