@@ -15,54 +15,54 @@ export function openMail(subject: string, body: string) {
 export const H2 = 'font-display text-[clamp(1.7rem,3.4vw,2.9rem)] leading-[1.12] tracking-[-0.02em] text-balance'
 export const WRAP = 'mx-auto max-w-[1280px] px-5 md:px-8'
 
-/* ---------- brand: one rounded line runs along the edges of a cube and draws an S, the top face lit in signal blue ---------- */
+/* ---------- brand: the Skenderi S, folded from isometric bands; navy faces lifted so they read on the dark page ---------- */
 
-const VB = '31.4 18 193.2 220'
-const S_LINE = 'M214.6 78L128 28L41.4 78L214.6 178L128 228L41.4 178'
-const FACE = 'M128 62.4L155.1 78L128 93.6L100.9 78Z'
-const LINE = { fill: 'none', stroke: '#EDEDE9', strokeWidth: 20, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
-const BLUE = { fill: '#3D7BFF', stroke: '#3D7BFF', strokeWidth: 8, strokeLinejoin: 'round' } as const
+const VB = '64 50 392 485'
+const FACES: [string, string][] = [
+  ['#3557A8', 'M64 175.4L260 50L260 145L136 224.4Z'],
+  ['#2A4596', 'M260 50L456 175.4L384 224.4L260 145Z'],
+  ['#1F7DFF', 'M136 224.4L260 300.9L260 395.9L64 270.4Z'],
+  ['#2E36A8', 'M64 175.4L136 224.4L64 270.4Z'],
+  ['#9A40FF', 'M384 360.6L260 284.1L260 189.1L456 314.6Z'],
+  ['#7426C4', 'M456 409.6L384 360.6L456 314.6Z'],
+  ['#C94AFF', 'M456 409.6L260 535L260 440L384 360.6Z'],
+  ['#6A1FAE', 'M260 535L64 409.6L136 360.6L260 440Z'],
+]
 
-export function Mark({ className = 'size-7' }: { className?: string }) {
+export function Mark({ className = 'h-8 w-auto' }: { className?: string }) {
   return (
     <svg viewBox={VB} className={className} aria-hidden>
-      <path d={S_LINE} {...LINE} />
-      <path d={FACE} {...BLUE} />
+      {FACES.map(([fill, d]) => (
+        <path key={d} d={d} fill={fill} />
+      ))}
     </svg>
   )
 }
 
-/* the mark at display size: the line draws itself along the cube, then the blue face lights up */
+/* the mark at display size: the bands unfold one after another, top to bottom */
 export function BigMark({ className = '' }: { className?: string }) {
   const reduce = useReducedMotion()
   return (
-    <svg viewBox={VB} className={className} role="img" aria-label="Das Zeichen von Skenderi Solutions: eine Linie folgt den Kanten eines Würfels und bildet ein S, die obere Fläche in Blau">
-      <motion.path
-        d={S_LINE}
-        {...LINE}
-        initial={reduce ? false : { pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.1, ease: [0.65, 0, 0.35, 1], delay: 0.15 }}
-      />
-      <motion.path
-        d={FACE}
-        {...BLUE}
-        initial={reduce ? false : { opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 1.1 }}
-        style={{ originX: 0.5, originY: 0.5 }}
-      />
+    <svg viewBox={VB} className={className} role="img" aria-label="Logo von Skenderi Solutions: ein S aus gefalteten Bändern in Navy, Blau und Violett">
+      {FACES.map(([fill, d], i) => (
+        <motion.path
+          key={d}
+          d={d}
+          fill={fill}
+          initial={reduce ? false : { opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.07 }}
+        />
+      ))}
     </svg>
   )
 }
 
 export function Lockup() {
   return (
-    <Link href="/" className="flex items-center gap-3 no-underline" aria-label="Skenderi Solutions, zur Startseite">
+    <Link href="/" className="flex items-center gap-2.5 no-underline" aria-label="Skenderi Solutions, zur Startseite">
       <Mark />
-      <span className="font-display text-[12px] tracking-[0.12em] text-paper">
-        SKENDERI <span className="text-steel">SOLUTIONS</span>
-      </span>
+      <span className="text-[18px] font-bold tracking-[-0.02em] text-paper">Skenderi Solutions</span>
     </Link>
   )
 }
