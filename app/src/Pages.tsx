@@ -111,7 +111,7 @@ export function AboutPage() {
           <div className="lg:col-span-7">
             <p className="text-[18px] leading-[1.65] text-ink-2">Skenderi Solutions wurde von Resul Skenderi gegründet.</p>
             <p className="mt-6 border-l-2 border-signal pl-4 text-[15px] leading-[1.6] text-mute">
-              Platzhalter: Hier folgen ein Foto, ein kurzer Werdegang und der Standort. Bitte von Resul ergänzen, nichts davon ist erfunden.
+              Foto, Werdegang und Standort folgen in Kürze.
             </p>
           </div>
         </div>
