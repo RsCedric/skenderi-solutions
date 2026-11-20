@@ -1,40 +1,32 @@
 @import "tailwindcss";
 
-@font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/archivo-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/archivo-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
-@font-face { font-family: "Plex Mono"; font-weight: 400; font-display: swap; src: url("/fonts/ibm-plex-mono-400-latin.woff2") format("woff2"); }
-@font-face { font-family: "Plex Mono"; font-weight: 700; font-display: swap; src: url("/fonts/ibm-plex-mono-700-latin.woff2") format("woff2"); }
+@font-face { font-family: "Doto"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/doto-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Doto"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/doto-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
+@font-face { font-family: "Host Grotesk"; font-style: normal; font-weight: 300 800; font-display: swap; src: url("/fonts/host-grotesk-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Host Grotesk"; font-style: normal; font-weight: 300 800; font-display: swap; src: url("/fonts/host-grotesk-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F; }
 
+/* "Anzeige": a flat page and one dot-matrix display. No glass, no glow, no rounding. */
 @theme {
-  --color-paper: #F3F1EC;
-  --color-paper-2: #E9E6DE;
+  --color-paper: #EDEDE9;
+  --color-paper-2: #E3E3DE;
   --color-ink: #0B1B3A;
-  --color-ink-2: #3A4866;
-  --color-line: #B9BFCB;
+  --color-ink-2: #4B5468;
+  --color-mute: #6E7486;
+  --color-line: rgb(11 27 58 / 0.16);
   --color-signal: #3D7BFF;
-  --color-band: #6A9BFF;
-  --font-sans: "Archivo", ui-sans-serif, sans-serif;
-  --font-mono: "Plex Mono", ui-monospace, monospace;
+  --color-error: #B3261E;
+  --font-sans: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Doto", "Host Grotesk", ui-monospace, monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-html { background: var(--color-paper); color: var(--color-ink); scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--font-sans); font-feature-settings: "ss01"; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-::selection { background: var(--color-signal); color: #fff; }
-:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 3px; border-radius: 2px; }
-input, textarea { caret-color: var(--color-signal); }
-html { scrollbar-color: var(--color-ink) var(--color-paper-2); scrollbar-width: thin; }
-a { text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
-
-/* drafting grid: 8mm major / 2mm minor, very faint */
-.sheet-grid {
-  background-image:
-    linear-gradient(to right, rgb(11 27 58 / 0.055) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(11 27 58 / 0.055) 1px, transparent 1px),
-    linear-gradient(to right, rgb(11 27 58 / 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(11 27 58 / 0.025) 1px, transparent 1px);
-  background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px;
-}
+html { background: var(--color-paper); color: var(--color-ink); scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; scrollbar-color: #9AA0AE var(--color-paper); scrollbar-width: thin; }
+body { font-family: var(--font-sans); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--color-ink); color: var(--color-paper); }
+:focus-visible { outline: 2px solid var(--color-signal); outline-offset: 3px; }
+input:focus-visible, textarea:focus-visible { outline: none; }
+input, textarea { caret-color: var(--color-signal); border-radius: 0; }
+a { text-underline-offset: 0.28em; text-decoration-thickness: 1px; }
 .tabular { font-variant-numeric: tabular-nums lining-nums; }
 
 @media (prefers-reduced-motion: reduce) {

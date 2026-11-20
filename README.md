@@ -2,7 +2,7 @@
 
 Website für **Skenderi Solutions**, IT-Dienstleister für KMU in der Schweiz: Netzwerk, Arbeitsplätze, Cloud & Microsoft 365, Sicherheit & Backup, Websites.
 
-Das Design ist eine technische Bauzeichnung, passend zur Botschaft *„IT, die geplant ist. Nicht geflickt.“*: Zeichenpapier mit Raster, Koordinatenleiste, ein axonometrisches 3D-Büromodell und das Kontaktformular als Plankopf.
+Das Design heisst „Anzeige“: flach und präzise, wie eine Statusanzeige im Serverraum, passend zur Botschaft *„IT, die geplant ist. Nicht geflickt.“*. Papiergrund, Navy aus dem Logo, das Logo-Blau als einzige Signalfarbe, eckige Formen, keine Schatten. Im Hero steht eine Punktmatrix-Anzeige (Canvas), die zwischen dem Logo-S und den vier Bereichen Netzwerk, Arbeitsplätze, Cloud und Sicherheit wechselt. Schriften: Doto (Punktmatrix) und Host Grotesk.
 
 ![Desktop Hero](screenshots/desktop-hero.png)
 

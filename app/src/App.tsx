@@ -1,20 +1,25 @@
-import { lazy, Suspense, useRef, useState, type FormEvent } from 'react'
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
-import { ArrowRight, ArrowUpRight, Check, Loader2, Menu, X } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { motion, useMotionValueEvent, useScroll, useSpring } from 'framer-motion'
+import { ArrowRight, ArrowUpRight, Check, Menu, X } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
-import type { PartId } from './Office3D'
+import DotPanel, { type Scene } from './DotPanel'
 
-const Office3D = lazy(() => import('./Office3D'))
+const MAIL = 'kontakt@skenderi-solutions.ch'
 
-const EASE = [0.16, 1, 0.3, 1] as const
+/* no backend yet: hand the request to the visitor's mail program, nothing is pretended */
+function openMail(subject: string, body: string) {
+  window.location.href = `mailto:${MAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+}
+
+const H2 = 'font-display text-[clamp(2.1rem,4.6vw,3.9rem)] font-[800] uppercase leading-[0.98] tracking-[-0.01em]'
 
 /* ---------- brand ---------- */
 
-function Mark({ className = 'size-9', inverted = false }: { className?: string; inverted?: boolean }) {
+function Mark({ className = 'size-8' }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} aria-hidden>
-      <rect width="120" height="120" rx="28" fill={inverted ? '#F3F1EC' : '#0B1B3A'} />
-      <path d="M84 30 H50 a15 15 0 0 0 0 30 H70 a15 15 0 0 1 0 30 H36" fill="none" stroke={inverted ? '#0B1B3A' : '#F3F1EC'} strokeWidth="12" />
+      <rect width="120" height="120" rx="28" fill="#0B1B3A" />
+      <path d="M84 30 H50 a15 15 0 0 0 0 30 H70 a15 15 0 0 1 0 30 H36" fill="none" stroke="#FFFFFF" strokeWidth="12" />
       <circle cx="86" cy="30" r="8" fill="#3D7BFF" />
       <circle cx="34" cy="90" r="8" fill="#3D7BFF" />
     </svg>
@@ -25,62 +30,49 @@ function Lockup() {
   return (
     <a href="#top" className="flex items-center gap-3 no-underline" aria-label="Skenderi Solutions, zum Seitenanfang">
       <Mark />
-      <span className="flex flex-col leading-none">
-        <span className="text-[17px] font-[750] tracking-[0.02em]">SKENDERI</span>
-        <span className="mt-1 text-[9.5px] font-semibold tracking-[0.5em] text-signal">SOLUTIONS</span>
+      <span className="text-[14px] font-[650] tracking-[0.08em]">
+        SKENDERI <span className="font-[450] text-ink-2">SOLUTIONS</span>
       </span>
     </a>
   )
 }
 
-/* ---------- sheet frame: coordinate ruler like a drawing border ---------- */
-
-function Ruler() {
-  const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-  return (
-    <div className="pointer-events-none hidden h-6 grid-cols-8 border-b border-ink/70 font-mono text-[10px] text-ink-2 md:grid" aria-hidden>
-      {cols.map((c) => (
-        <span key={c} className="grid place-items-center border-l border-ink/25 first:border-l-0">{c}</span>
-      ))}
-    </div>
-  )
-}
-
 /* ---------- nav ---------- */
+
+const LINKS = [
+  ['Leistungen', '#leistungen'],
+  ['Ablauf', '#ablauf'],
+  ['Kontakt', '#kontakt'],
+]
 
 function Nav() {
   const [open, setOpen] = useState(false)
-  const links = [
-    ['Leistungen', '#leistungen'],
-    ['Ablauf', '#ablauf'],
-    ['Kontakt', '#kontakt'],
-  ]
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/70 bg-paper/92 backdrop-blur-sm">
-      <div className="mx-auto flex h-[68px] max-w-[1360px] items-center justify-between px-5 md:px-8">
+    <header className="sticky top-0 z-40 border-b border-line bg-paper">
+      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-5 md:px-8">
         <Lockup />
-        <nav className="hidden items-center gap-9 md:flex" aria-label="Hauptnavigation">
-          {links.map(([l, h]) => (
-            <a key={h} href={h} className="text-[15px] font-medium text-ink-2 no-underline transition-colors duration-150 hover:text-ink">
+        <nav className="hidden items-center gap-8 md:flex" aria-label="Hauptnavigation">
+          {LINKS.map(([l, h]) => (
+            <a key={h} href={h} className="text-[15px] font-medium text-ink-2 no-underline transition-colors duration-150 hover:text-ink hover:underline">
               {l}
             </a>
           ))}
           <a
             href="#kontakt"
-            className="group inline-flex h-10 items-center gap-2 rounded-[3px] bg-ink px-4 text-[14px] font-semibold text-paper no-underline transition-[background-color,transform] duration-150 hover:bg-signal active:scale-[0.97]"
+            className="group inline-flex h-10 items-center gap-2 bg-ink px-4 text-[14px] font-semibold text-paper no-underline transition-colors duration-150 hover:bg-signal hover:text-ink"
           >
             Erstgespräch
             <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" strokeWidth={2.2} />
           </a>
         </nav>
-        <button className="grid size-10 place-items-center md:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menü">
+        <button className="-mr-2 grid size-11 place-items-center md:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menü">
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
       {open && (
-        <nav className="border-t border-ink/20 px-5 pb-5 md:hidden" aria-label="Mobile Navigation">
-          {links.map(([l, h]) => (
-            <a key={h} href={h} onClick={() => setOpen(false)} className="block border-b border-ink/15 py-4 text-lg font-semibold no-underline">
+        <nav className="border-t border-line md:hidden" aria-label="Mobile Navigation">
+          {LINKS.map(([l, h]) => (
+            <a key={h} href={h} onClick={() => setOpen(false)} className="block border-b border-line px-5 py-4 text-[18px] font-semibold no-underline last:border-b-0">
               {l}
             </a>
           ))}
@@ -90,11 +82,11 @@ function Nav() {
   )
 }
 
-/* ---------- hero: the drawing sheet, title block is the form ---------- */
+/* ---------- hero ---------- */
 
 function QuickForm() {
   const [value, setValue] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const [state, setState] = useState<'idle' | 'done' | 'error'>('idle')
   function submit(e: FormEvent) {
     e.preventDefault()
     const v = value.trim()
@@ -103,319 +95,312 @@ function QuickForm() {
       setState('error')
       return
     }
-    setState('sending')
-    setTimeout(() => {
-      setState('done')
-      toast.success('Anfrage erfasst', { description: 'Wir melden uns innerhalb eines Arbeitstages für einen Termin.' })
-    }, 900)
+    openMail('Erstgespräch', `Guten Tag\n\nIch interessiere mich für ein Erstgespräch. Sie erreichen mich unter: ${v}\n\nFreundliche Grüsse`)
+    setState('done')
+    toast.success('Ihr Mailprogramm öffnet sich', { description: 'Senden Sie die vorbereitete Nachricht ab, dann melden wir uns persönlich.' })
   }
   return (
-    <form onSubmit={submit} noValidate className="border border-ink bg-paper">
-      <div className="grid grid-cols-[1fr_auto] border-b border-ink font-mono text-[10.5px] uppercase tracking-[0.08em] text-ink-2">
-        <span className="px-3 py-2">Plankopf · Erstgespräch</span>
-        <span className="border-l border-ink px-3 py-2 tabular">Blatt 1/1</span>
+    <form onSubmit={submit} noValidate className="w-full max-w-[520px]">
+      <label htmlFor="quick" className="mb-2 block text-[14px] font-semibold">
+        E-Mail oder Telefon
+      </label>
+      <div className={`flex flex-col border sm:flex-row ${state === 'error' ? 'border-error' : 'border-ink'} transition-colors focus-within:border-signal`}>
+        <input
+          id="quick"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value)
+            if (state === 'error') setState('idle')
+          }}
+          disabled={state === 'done'}
+          aria-invalid={state === 'error'}
+          aria-describedby="quick-hint"
+          placeholder="name@firma.ch"
+          className="h-13 min-w-0 flex-1 bg-transparent px-4 text-[16px] outline-none placeholder:text-mute disabled:opacity-60"
+        />
+        <button
+          type="submit"
+          disabled={state === 'done'}
+          className="group inline-flex h-13 shrink-0 items-center justify-center gap-2 bg-ink px-5 text-[15px] font-semibold text-paper transition-colors duration-150 hover:bg-signal hover:text-ink disabled:cursor-default disabled:hover:bg-ink disabled:hover:text-paper"
+        >
+          {state === 'done' && <Check className="size-4" strokeWidth={2.6} />}
+          {state === 'done' ? 'Vorbereitet' : 'Erstgespräch anfragen'}
+          {state !== 'done' && <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />}
+        </button>
       </div>
-      <div className="p-4">
-        <label htmlFor="quick" className="mb-2 block text-[15px] font-semibold">
-          Wie erreichen wir Sie?
-        </label>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            id="quick"
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value)
-              if (state === 'error') setState('idle')
-            }}
-            disabled={state === 'done'}
-            aria-invalid={state === 'error'}
-            aria-describedby="quick-hint"
-            placeholder="E-Mail oder Telefon"
-            className="h-12 min-w-0 flex-1 rounded-[3px] border border-ink/60 bg-white px-3.5 text-[16px] outline-none transition-colors placeholder:text-ink-2/80 focus:border-signal aria-[invalid=true]:border-[#C2261B] disabled:opacity-60"
-          />
-          <button
-            type="submit"
-            disabled={state === 'sending' || state === 'done'}
-            className="group inline-flex h-12 items-center justify-center gap-2 rounded-[3px] bg-signal px-5 text-[15px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-ink active:scale-[0.97] disabled:cursor-default disabled:hover:bg-signal"
-          >
-            {state === 'sending' && <Loader2 className="size-4 animate-spin" />}
-            {state === 'done' && <Check className="size-4" strokeWidth={2.6} />}
-            {state === 'done' ? 'Angefragt' : 'Erstgespräch anfragen'}
-            {state === 'idle' || state === 'error' ? <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" /> : null}
-          </button>
-        </div>
-        <p id="quick-hint" className={`mt-2 text-[13px] ${state === 'error' ? 'text-[#B0231A]' : 'text-ink-2'}`}>
-          {state === 'error'
-            ? 'Das sieht weder nach E-Mail noch nach Telefonnummer aus. Bitte prüfen.'
-            : state === 'done'
-              ? 'Danke. Wir rufen zurück oder schreiben Ihnen.'
-              : 'Kostenlos und unverbindlich. Wir melden uns persönlich.'}
-        </p>
-      </div>
-      <div className="grid grid-cols-3 border-t border-ink font-mono text-[10.5px] text-ink-2 tabular">
-        <span className="px-3 py-2">M 1:50</span>
-        <span className="border-l border-ink px-3 py-2">Rev. {state === 'done' ? 'B' : 'A'}</span>
-        <span className="border-l border-ink px-3 py-2">{state === 'done' ? 'Anfrage erfasst' : 'Entwurf'}</span>
-      </div>
+      <p id="quick-hint" aria-live="polite" className={`mt-2.5 text-[14px] ${state === 'error' ? 'text-error' : 'text-ink-2'}`}>
+        {state === 'error'
+          ? 'Das sieht weder nach E-Mail noch nach Telefonnummer aus. Bitte prüfen.'
+          : state === 'done'
+            ? 'Nachricht vorbereitet. Bitte im Mailprogramm absenden.'
+            : 'Kostenlos und unverbindlich. Öffnet Ihr Mailprogramm.'}
+      </p>
     </form>
   )
 }
 
-function Hero({ active, setActive }: { active: PartId | null; setActive: (p: PartId | null) => void }) {
+const AREAS: { id: Exclude<Scene, 'logo'>; label: string }[] = [
+  { id: 'network', label: 'Netzwerk' },
+  { id: 'workplaces', label: 'Arbeitsplätze' },
+  { id: 'cloud', label: 'Cloud' },
+  { id: 'security', label: 'Sicherheit' },
+]
+const CYCLE: Scene[] = ['logo', ...AREAS.map((a) => a.id)]
+const LABEL: Record<Scene, string> = { logo: 'Skenderi Solutions', network: 'Netzwerk', workplaces: 'Arbeitsplätze', cloud: 'Cloud & M365', security: 'Sicherheit & Backup' }
+
+function Hero() {
+  const [step, setStep] = useState(0)
+  const [pinned, setPinned] = useState<Scene | null>(null)
+  const panel = useRef<HTMLDivElement>(null)
+
+  // the display cycles while it is on screen and nobody points at it
+  useEffect(() => {
+    if (pinned || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let visible = true
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting))
+    if (panel.current) io.observe(panel.current)
+    const id = window.setInterval(() => {
+      if (visible && !document.hidden) setStep((s) => (s + 1) % CYCLE.length)
+    }, 3000)
+    return () => {
+      window.clearInterval(id)
+      io.disconnect()
+    }
+  }, [pinned])
+
+  const scene = pinned ?? CYCLE[step]
+
   return (
-    <section id="top" className="relative border-b border-ink/70">
-      <div className="sheet-grid absolute inset-0" aria-hidden />
-      <div className="relative mx-auto flex max-w-[1360px] flex-col lg:block lg:h-[max(760px,calc(100svh-92px))]">
-        {/* lettering */}
-        <div className="relative z-10 px-5 pt-14 md:px-8 lg:max-w-[600px] lg:pt-20">
-          <h1 className="text-balance text-[clamp(2.9rem,5.6vw,4.9rem)] font-[820] leading-[0.95] tracking-[-0.035em]">
-            IT, die geplant ist.
-            <span className="block text-ink-2/75">Nicht geflickt.</span>
-          </h1>
-          <p className="mt-7 max-w-[36ch] text-[19px] leading-[1.5] text-ink-2">
-            Wir planen, bauen und betreuen die IT von KMU: Netzwerk, Arbeitsplätze, Cloud und Sicherheit. Ein Ansprechpartner, ein Plan, der aufgeht.
-          </p>
-        </div>
+    <section id="top" className="border-b border-line">
+      <div className="mx-auto max-w-[1280px] px-5 pb-16 pt-14 md:px-8 md:pb-20 md:pt-20">
+        <h1 className="font-display text-[clamp(2.6rem,8.4vw,6rem)] font-[800] uppercase leading-[0.95] tracking-[-0.01em]">
+          <span className="block">IT, die geplant ist.</span>
+          <span className="block text-mute">Nicht geflickt.</span>
+        </h1>
 
-        {/* the drawing fills the sheet */}
-        <div className="relative h-[420px] sm:h-[520px] lg:absolute lg:inset-y-0 lg:left-[36%] lg:right-0 lg:h-auto">
-          <Suspense fallback={null}>
-            <Office3D active={active} onHover={setActive} />
-          </Suspense>
-          <p className="pointer-events-none absolute right-5 top-5 hidden font-mono text-[11px] uppercase tracking-[0.08em] text-ink-2 md:right-8 md:block">
-            Ansicht A · Büro, axonometrisch
-          </p>
-        </div>
+        <div className="mt-12 grid gap-12 md:mt-16 lg:grid-cols-12 lg:gap-8">
+          <div className="flex flex-col justify-between gap-10 lg:col-span-5">
+            <p className="max-w-[42ch] text-[19px] leading-[1.55] text-ink-2">
+              Wir planen, bauen und betreuen die IT von KMU: Netzwerk, Arbeitsplätze, Cloud und Sicherheit. Ein Ansprechpartner, ein Plan, der aufgeht.
+            </p>
+            <QuickForm />
+          </div>
 
-        {/* title block in the sheet corner = the action */}
-        <div className="relative z-10 px-5 pb-10 md:px-8 lg:absolute lg:bottom-8 lg:left-8 lg:w-[520px] lg:p-0">
-          <QuickForm />
+          <div ref={panel} className="lg:col-span-6 lg:col-start-7">
+            <DotPanel scene={scene} label={LABEL[scene]} />
+            <ul className="grid grid-cols-2 border-l border-line sm:grid-cols-4" aria-label="Die vier Bereiche Ihrer IT">
+              {AREAS.map((a) => {
+                const on = scene === a.id
+                return (
+                  <li key={a.id} className="border-b border-r border-line">
+                    <a
+                      href={`#${a.id}`}
+                      onMouseEnter={() => setPinned(a.id)}
+                      onMouseLeave={() => setPinned(null)}
+                      onFocus={() => setPinned(a.id)}
+                      onBlur={() => setPinned(null)}
+                      className={`flex h-12 items-center gap-2.5 px-3 text-[14px] font-medium no-underline transition-colors duration-200 ${on ? 'bg-paper-2 text-ink' : 'text-ink-2 hover:text-ink'}`}
+                    >
+                      <span className={`size-1.5 shrink-0 transition-colors duration-200 ${on ? 'bg-signal' : 'bg-line'}`} aria-hidden />
+                      {a.label}
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-/* ---------- parts list ---------- */
+/* ---------- services ---------- */
 
-const PARTS: { id: PartId | 'web'; pos: string; title: string; text: string; items: string }[] = [
-  { id: 'network', pos: '1', title: 'Netzwerk & WLAN', text: 'Router, Switches, Firewall und WLAN, geplant für Ihre Räume und dokumentiert bis zum letzten Port.', items: 'Firewall · Switch · Access Points · VPN' },
-  { id: 'workplaces', pos: '2', title: 'Arbeitsplätze', text: 'Laptops, PCs und Drucker: eingerichtet, inventarisiert und ersetzt, bevor sie Ihnen den Tag kosten.', items: 'Einrichtung · Inventar · Ersatz · Support' },
-  { id: 'cloud', pos: '3', title: 'Cloud & Microsoft 365', text: 'Mail, Teams und Dateien. Umzug ohne Datenverlust, Berechtigungen, die zur Firma passen.', items: 'Exchange · Teams · SharePoint · Lizenzen' },
-  { id: 'security', pos: '4', title: 'Sicherheit & Backup', text: 'Backups, die regelmässig getestet werden. Updates, Virenschutz und Zugänge mit zweitem Faktor.', items: 'Backup · Updates · MFA · Notfallplan' },
-  { id: 'web', pos: '5', title: 'Websites & Web-Apps', text: 'Ihre Website und interne Werkzeuge, gebaut mit React und TypeScript, schnell und wartbar.', items: 'Website · Formulare · Interne Tools' },
+const SERVICES: { id: string; title: string; text: string; items: string[] }[] = [
+  { id: 'network', title: 'Netzwerk & WLAN', text: 'Router, Switches, Firewall und WLAN, geplant für Ihre Räume und dokumentiert bis zum letzten Port.', items: ['Firewall', 'Switch', 'Access Points', 'VPN'] },
+  { id: 'workplaces', title: 'Arbeitsplätze', text: 'Laptops, PCs und Drucker: eingerichtet, inventarisiert und ersetzt, bevor sie Ihnen den Tag kosten.', items: ['Einrichtung', 'Inventar', 'Ersatz', 'Support'] },
+  { id: 'cloud', title: 'Cloud & Microsoft 365', text: 'Mail, Teams und Dateien. Umzug ohne Datenverlust, Berechtigungen, die zur Firma passen.', items: ['Exchange', 'Teams', 'SharePoint', 'Lizenzen'] },
+  { id: 'security', title: 'Sicherheit & Backup', text: 'Backups, die regelmässig getestet werden. Updates, Virenschutz und Zugänge mit zweitem Faktor.', items: ['Backup', 'Updates', 'MFA', 'Notfallplan'] },
+  { id: 'web', title: 'Websites & Web-Apps', text: 'Ihre Website und interne Werkzeuge, gebaut mit React und TypeScript, schnell und wartbar.', items: ['Website', 'Formulare', 'Interne Tools'] },
 ]
 
-function Parts({ active, setActive }: { active: PartId | null; setActive: (p: PartId | null) => void }) {
+function Services() {
   return (
-    <section id="leistungen" className="scroll-mt-20 border-b border-ink/70">
-      <div className="mx-auto max-w-[1360px] px-5 py-24 md:px-8 md:py-32">
-        <div className="grid gap-6 lg:grid-cols-12">
-          <h2 className="text-balance text-[clamp(2.2rem,4.2vw,3.6rem)] font-[800] leading-[1] tracking-[-0.03em] lg:col-span-5">
-            Alles, was Ihr Büro am Laufen hält.
-          </h2>
-          <p className="max-w-[52ch] text-[18px] leading-[1.55] text-ink-2 lg:col-span-5 lg:col-start-8 lg:pt-2">
-            Die Stückliste Ihrer IT. Wir übernehmen einzelne Positionen oder das Ganze, und alles landet in einer Dokumentation, die Sie behalten.
+    <section id="leistungen" className="scroll-mt-16">
+      <div className="mx-auto max-w-[1280px] px-5 py-24 md:px-8 md:py-32">
+        <div className="grid gap-8 lg:grid-cols-12">
+          <h2 className={`${H2} lg:col-span-7`}>Alles, was Ihr Büro am Laufen hält.</h2>
+          <p className="max-w-[44ch] text-[18px] leading-[1.6] text-ink-2 lg:col-span-4 lg:col-start-9 lg:self-end">
+            Wir übernehmen einzelne Bereiche oder das Ganze. Alles landet in einer Dokumentation, die Ihnen gehört.
           </p>
         </div>
 
-        <div className="mt-16 border-t-2 border-ink" role="table" aria-label="Leistungen">
-          <div role="row" className="hidden grid-cols-[72px_1.1fr_1.6fr_1fr] border-b border-ink py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-2 md:grid">
-            <span role="columnheader">Pos.</span>
-            <span role="columnheader">Bauteil</span>
-            <span role="columnheader">Was wir machen</span>
-            <span role="columnheader">Umfang</span>
-          </div>
-          {PARTS.map((p) => {
-            const on = active === p.id
-            const hoverable = p.id !== 'web'
-            return (
-              <div
-                key={p.id}
-                id={`pos-${p.id}`}
-                role="row"
-                onMouseEnter={() => hoverable && setActive(p.id as PartId)}
-                onMouseLeave={() => hoverable && setActive(null)}
-                className={`grid scroll-mt-28 grid-cols-[48px_1fr] gap-x-4 gap-y-2 border-b border-ink/30 py-7 transition-colors duration-200 md:grid-cols-[72px_1.1fr_1.6fr_1fr] md:gap-x-0 ${on ? 'bg-[#DCE6FF]' : ''}`}
-              >
-                <span role="cell" className={`font-mono text-[15px] font-bold tabular md:pl-1 ${on ? 'text-signal' : ''}`}>{p.pos}</span>
-                <span role="cell" className="text-[22px] font-[750] leading-tight tracking-[-0.01em] md:pr-6">{p.title}</span>
-                <span role="cell" className="col-start-2 max-w-[48ch] text-[16.5px] leading-[1.55] text-ink-2 md:col-start-auto md:pr-8">{p.text}</span>
-                <span role="cell" className="col-start-2 font-mono text-[12px] leading-[1.7] text-ink-2 md:col-start-auto">{p.items}</span>
+        <ul className="mt-16 border-t border-ink md:mt-20">
+          {SERVICES.map((s) => (
+            <li key={s.id} id={s.id} className="group scroll-mt-20 border-b border-line">
+              <div className="grid gap-x-8 gap-y-3 py-8 transition-colors duration-200 md:grid-cols-12 md:py-10 md:hover:bg-paper-2">
+                <h3 className="text-[clamp(1.35rem,2.2vw,1.75rem)] font-[600] leading-tight tracking-[-0.02em] md:col-span-4 md:pl-4">{s.title}</h3>
+                <p className="max-w-[52ch] text-[17px] leading-[1.6] text-ink-2 md:col-span-5">{s.text}</p>
+                <p className="text-[14px] leading-[1.7] text-mute md:col-span-3 md:pr-4 md:text-right">{s.items.join(' · ')}</p>
               </div>
-            )
-          })}
-        </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )
 }
 
-/* ---------- process: the S trace routes the steps ---------- */
+/* ---------- process ---------- */
 
 const STEPS = [
-  { k: 'A', t: 'Erstgespräch', d: 'Sie erzählen, was nervt und was laufen muss. Wir hören zu und stellen die richtigen Fragen.' },
-  { k: 'B', t: 'Bestandsaufnahme', d: 'Vor Ort schauen wir an, was da ist: Geräte, Netz, Lizenzen, Zugänge, Backups.' },
-  { k: 'C', t: 'Plan', d: 'Sie bekommen einen schriftlichen Plan mit Prioritäten und Kosten, bevor irgendetwas passiert.' },
-  { k: 'D', t: 'Umsetzung & Betreuung', d: 'Wir bauen um, dokumentieren jeden Schritt und bleiben Ihr fester Ansprechpartner.' },
+  { t: 'Erstgespräch', d: 'Sie erzählen, was nervt und was laufen muss. Wir hören zu und stellen die richtigen Fragen.' },
+  { t: 'Bestandsaufnahme', d: 'Vor Ort schauen wir an, was da ist: Geräte, Netz, Lizenzen, Zugänge, Backups.' },
+  { t: 'Plan', d: 'Sie bekommen einen schriftlichen Plan mit Prioritäten und Kosten, bevor irgendetwas passiert.' },
+  { t: 'Umsetzung & Betreuung', d: 'Wir bauen um, dokumentieren jeden Schritt und bleiben Ihr fester Ansprechpartner.' },
 ]
 
 function Process() {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLOListElement>(null)
+  const [reached, setReached] = useState(0)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 75%', 'end 60%'] })
   const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.4 })
-  const nodeA = useTransform(progress, [0, 0.04], [0.25, 1])
-  const nodeB = useTransform(progress, [0.95, 1], [0.25, 1])
+  useMotionValueEvent(progress, 'change', (v) => {
+    const r = Math.min(STEPS.length, Math.floor(v * STEPS.length + 0.15))
+    setReached((p) => (p === r ? p : r))
+  })
 
   return (
-    <section id="ablauf" className="relative scroll-mt-20 overflow-hidden border-b border-ink/70 bg-ink text-paper">
-      <div className="mx-auto max-w-[1360px] px-5 py-24 md:px-8 md:py-32">
-        <h2 className="max-w-[16ch] text-balance text-[clamp(2.2rem,4.2vw,3.6rem)] font-[800] leading-[1] tracking-[-0.03em]">
-          Vom ersten Anruf bis zur Dokumentation.
-        </h2>
+    <section id="ablauf" className="scroll-mt-16 bg-ink text-paper">
+      <div className="mx-auto max-w-[1280px] px-5 py-24 md:px-8 md:py-32">
+        <h2 className={`${H2} max-w-[16ch]`}>Vom ersten Anruf bis zur Dokumentation.</h2>
 
-        <div ref={ref} className="relative mt-20">
-          {/* the trace, desktop */}
-          <svg viewBox="0 0 1200 560" className="absolute inset-0 hidden h-full w-full lg:block" preserveAspectRatio="none" aria-hidden>
-            <path d="M1140 40 H300 a110 110 0 0 0 0 220 H900 a110 110 0 0 1 0 220 H60" fill="none" stroke="rgb(243 241 236 / 0.12)" strokeWidth="14" vectorEffect="non-scaling-stroke" />
-            <motion.path
-              d="M1140 40 H300 a110 110 0 0 0 0 220 H900 a110 110 0 0 1 0 220 H60"
-              fill="none"
-              stroke="#F3F1EC"
-              strokeWidth="14"
-              vectorEffect="non-scaling-stroke"
-              style={{ pathLength: progress }}
-            />
-            <motion.circle cx="1146" cy="40" r="15" fill="#3D7BFF" style={{ opacity: nodeA }} />
-            <motion.circle cx="54" cy="480" r="15" fill="#3D7BFF" style={{ opacity: nodeB }} />
-          </svg>
-
-          <ol className="relative grid gap-y-14 lg:block lg:h-[560px]">
-            {STEPS.map((s, i) => (
-              <motion.li
-                key={s.k}
-                initial={{ y: 12 }}
-                whileInView={{ y: 0 }}
-                viewport={{ amount: 0.6 }}
-                transition={{ duration: 0.7, ease: EASE }}
-                className={`relative max-w-[40ch] border-l border-paper/30 pl-6 lg:border-l-0 lg:pl-0 ${
-                  ['lg:absolute lg:left-[66%] lg:top-[13%] lg:w-[28%]', 'lg:absolute lg:left-[30%] lg:top-[13%] lg:w-[28%]', 'lg:absolute lg:left-[6%] lg:top-[52%] lg:w-[28%]', 'lg:absolute lg:left-[40%] lg:top-[52%] lg:w-[28%]'][i]
-                }`}
-              >
-                <span className="font-mono text-[12px] font-bold tracking-[0.1em] text-[#8FB3FF]">Schritt {s.k}</span>
-                <h3 className="mt-2 text-[26px] font-[750] leading-tight tracking-[-0.015em]">{s.t}</h3>
-                <p className="mt-2 text-[16.5px] leading-[1.55] text-paper/75">{s.d}</p>
-              </motion.li>
-            ))}
-          </ol>
-        </div>
+        <ol ref={ref} className="relative mt-16 grid gap-0 md:mt-20 lg:grid-cols-4">
+          {/* the line fills as you read: horizontal on wide screens, vertical below */}
+          <span className="absolute inset-x-0 top-0 hidden h-px bg-white/20 lg:block" aria-hidden />
+          <motion.span className="absolute inset-x-0 top-0 hidden h-0.5 origin-left bg-signal lg:block" style={{ scaleX: progress }} aria-hidden />
+          <span className="absolute bottom-0 left-0 top-0 w-px bg-white/20 lg:hidden" aria-hidden />
+          <motion.span className="absolute bottom-0 left-0 top-0 w-0.5 origin-top bg-signal lg:hidden" style={{ scaleY: progress }} aria-hidden />
+          {STEPS.map((s, i) => {
+            const lit = reached > i
+            return (
+              <li key={s.t} className="relative pb-12 pl-8 last:pb-0 lg:pb-0 lg:pl-0 lg:pr-8 lg:pt-10">
+                <span
+                  className={`block font-display text-[64px] font-[800] leading-none transition-colors duration-500 lg:text-[88px] ${lit ? 'text-paper' : 'text-[#5A6680]'}`}
+                  aria-hidden
+                >
+                  {i + 1}
+                </span>
+                <h3 className="mt-5 text-[22px] font-[600] leading-tight tracking-[-0.015em]">{s.t}</h3>
+                <p className="mt-3 max-w-[34ch] text-[16px] leading-[1.6] text-[#B7BFCF]">{s.d}</p>
+              </li>
+            )
+          })}
+        </ol>
       </div>
     </section>
   )
 }
 
-/* ---------- contact band ---------- */
+/* ---------- contact ---------- */
+
+const INPUT = 'h-12 border-0 border-b border-ink bg-transparent px-0 text-[17px] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-mute focus:border-signal focus:shadow-[0_1px_0_0_var(--color-signal)]'
 
 function Field({ id, label, ...rest }: { id: string; label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[14px] font-semibold text-ink">{label}</label>
-      <input id={id} name={id} {...rest} className="h-12 rounded-[3px] border border-ink/70 bg-paper px-3.5 text-[16px] outline-none transition-colors placeholder:text-ink-2/80 focus:border-ink focus:bg-white" />
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-[14px] font-semibold">{label}</label>
+      <input id={id} name={id} {...rest} className={INPUT} />
     </div>
   )
 }
 
 function Contact() {
-  const [sending, setSending] = useState(false)
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const form = e.currentTarget
-    const data = new FormData(form)
+    const data = new FormData(e.currentTarget)
     if (!String(data.get('name')).trim() || !String(data.get('reach')).trim()) {
       toast.error('Name und Kontakt fehlen', { description: 'Ohne die beiden können wir uns nicht melden.' })
       return
     }
-    setSending(true)
-    setTimeout(() => {
-      setSending(false)
-      form.reset()
-      toast.success('Anfrage erfasst', { description: 'Wir melden uns innerhalb eines Arbeitstages.' })
-    }, 1000)
+    const company = String(data.get('company') || '').trim()
+    openMail(
+      `Erstgespräch${company ? ` · ${company}` : ''}`,
+      `Name: ${data.get('name')}\nFirma: ${company || '–'}\nKontakt: ${data.get('reach')}\n\n${String(data.get('topic') || '').trim()}`,
+    )
+    toast.success('Ihr Mailprogramm öffnet sich', { description: 'Senden Sie die vorbereitete Nachricht ab, dann melden wir uns persönlich.' })
   }
   return (
-    <section id="kontakt" className="scroll-mt-20 border-b border-ink/70 bg-band">
-      <div className="mx-auto grid max-w-[1360px] gap-14 px-5 py-24 md:px-8 md:py-32 lg:grid-cols-12">
+    <section id="kontakt" className="scroll-mt-16">
+      <div className="mx-auto grid max-w-[1280px] gap-14 px-5 py-24 md:px-8 md:py-32 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-5">
-          <h2 className="text-balance text-[clamp(2.6rem,5.4vw,4.6rem)] font-[820] leading-[0.95] tracking-[-0.035em] text-ink">
-            Planen wir Ihre IT.
+          <h2 className={H2}>
+            Planen wir<br />Ihre IT.
           </h2>
-          <p className="mt-6 max-w-[38ch] text-[18px] leading-[1.55] text-ink">
+          <p className="mt-7 max-w-[38ch] text-[18px] leading-[1.6] text-ink-2">
             Ein Gespräch, kostenlos und unverbindlich. Danach wissen Sie, wo Ihre IT steht und was als Nächstes kommt.
           </p>
-          <a href="mailto:kontakt@skenderi-solutions.ch" className="mt-10 inline-flex items-center gap-2 text-[17px] font-semibold text-ink underline">
-            kontakt@skenderi-solutions.ch <ArrowUpRight className="size-4" />
+          <a href={`mailto:${MAIL}`} className="mt-10 inline-flex items-center gap-2 text-[17px] font-semibold text-ink underline">
+            {MAIL} <ArrowUpRight className="size-4" />
           </a>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink/80">Platzhalter-Adresse</p>
+          <p className="mt-1.5 text-[13px] text-mute">Platzhalter-Adresse</p>
         </div>
 
-        <form onSubmit={submit} className="grid gap-5 border-2 border-ink bg-paper p-6 md:p-8 lg:col-span-6 lg:col-start-7" noValidate>
-          <div className="grid gap-5 sm:grid-cols-2">
+        <form onSubmit={submit} className="grid gap-8 border-t border-ink pt-8 lg:col-span-6 lg:col-start-7" noValidate>
+          <div className="grid gap-8 sm:grid-cols-2">
             <Field id="name" label="Name" autoComplete="name" placeholder="Vorname Nachname" />
             <Field id="company" label="Firma" autoComplete="organization" placeholder="Muster AG" />
           </div>
           <Field id="reach" label="E-Mail oder Telefon" autoComplete="email" placeholder="name@firma.ch" />
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <label htmlFor="topic" className="text-[14px] font-semibold">Worum geht es?</label>
-            <textarea id="topic" name="topic" rows={4} placeholder="z. B. WLAN fällt dauernd aus, neue Mitarbeitende brauchen Laptops, Umzug auf Microsoft 365 …" className="resize-none rounded-[3px] border border-ink/70 bg-paper px-3.5 py-3 text-[16px] leading-[1.5] outline-none transition-colors placeholder:text-ink-2/80 focus:border-ink focus:bg-white" />
+            <textarea
+              id="topic"
+              name="topic"
+              rows={3}
+              placeholder="z. B. WLAN fällt dauernd aus, neue Mitarbeitende brauchen Laptops, Umzug auf Microsoft 365 …"
+              className={`${INPUT} h-auto resize-none py-3 leading-[1.5]`}
+            />
           </div>
-          <button type="submit" disabled={sending} className="group inline-flex h-14 items-center justify-center gap-2 rounded-[3px] bg-ink px-6 text-[16px] font-semibold text-paper transition-[background-color,transform] duration-150 hover:bg-signal active:scale-[0.98] disabled:opacity-80">
-            {sending ? <Loader2 className="size-4 animate-spin" /> : null}
-            {sending ? 'Wird gesendet' : 'Erstgespräch anfragen'}
-            {!sending && <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />}
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button type="submit" className="group inline-flex h-14 items-center justify-center gap-2 bg-ink px-7 text-[16px] font-semibold text-paper transition-colors duration-150 hover:bg-signal hover:text-ink">
+              Erstgespräch anfragen
+              <ArrowRight className="size-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
+            </button>
+            <p className="text-[14px] text-ink-2">Öffnet Ihr Mailprogramm mit der fertigen Nachricht.</p>
+          </div>
         </form>
       </div>
     </section>
   )
 }
 
-/* ---------- footer = title block ---------- */
+/* ---------- footer ---------- */
 
 function Footer() {
-  const cells: [string, string][] = [
-    ['Auftragnehmer', 'Skenderi Solutions'],
-    ['Leistung', 'IT-Planung, Aufbau, Betreuung'],
-    ['Region', 'Schweiz'],
-    ['Kontakt', 'kontakt@skenderi-solutions.ch (Platzhalter)'],
-  ]
   return (
-    <footer className="mx-auto max-w-[1360px] px-5 py-14 md:px-8">
-      <div className="grid border-2 border-ink md:grid-cols-[1.3fr_repeat(4,1fr)]">
-        <div className="flex items-center border-b border-ink p-5 md:border-b-0 md:border-r">
-          <Lockup />
-        </div>
-        {cells.map(([k, v], i) => (
-          <div key={k} className={`p-5 ${i < cells.length - 1 ? 'border-b border-ink md:border-b-0 md:border-r' : ''}`}>
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-ink-2">{k}</p>
-            <p className="mt-1.5 text-[14.5px] font-semibold leading-snug">{v}</p>
-          </div>
-        ))}
+    <footer className="border-t border-line">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-5 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+        <Lockup />
+        <p className="text-[14px] text-ink-2">IT-Planung, Aufbau und Betreuung für KMU in der Schweiz</p>
+        <p className="tabular text-[14px] text-ink-2">© 2026 Skenderi Solutions</p>
       </div>
-      <p className="mt-4 font-mono text-[11px] text-ink-2 tabular">© 2026 Skenderi Solutions · Blatt 1/1 · M 1:1</p>
     </footer>
   )
 }
 
 export default function App() {
-  const [active, setActive] = useState<PartId | null>(null)
   return (
     <>
-      <Toaster position="bottom-right" toastOptions={{ style: { fontFamily: 'Archivo, sans-serif', borderRadius: 3, border: '1px solid #0B1B3A', background: '#F3F1EC', color: '#0B1B3A' } }} />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{ style: { fontFamily: '"Host Grotesk", sans-serif', borderRadius: 0, border: '1px solid #0B1B3A', background: '#EDEDE9', color: '#0B1B3A', boxShadow: 'none' } }}
+      />
       <Nav />
-      <Ruler />
       <main>
-        <Hero active={active} setActive={setActive} />
-        <Parts active={active} setActive={setActive} />
+        <Hero />
+        <Services />
         <Process />
         <Contact />
       </main>
